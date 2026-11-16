@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logistics & CSV Data Suite</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- PapaParse for CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
+  <!-- JSZip for Multi-file / Zip Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  <!-- SheetJS for Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .tab-active {
+      background: #4f46e5;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-800">
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="sticky top-0 z-50 glass border-b border-slate-200/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo / Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+            <i class="fa-solid fa-cube text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">DataSuite Tools</span>
+              <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wider bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100 uppercase">Web GitHub Edition</span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">All-in-One Operations, Logistics & CSV Processing</p>
+          </div>
+        </div>
+
+        <!-- Privacy & Github Badge -->
+        <div class="flex items-center gap-3">
+          <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>100% Client-Side (Data Aman & Privat)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs (Scrollable on Mobile) -->
+      <div class="flex space-x-2 py-2 overflow-x-auto no-scrollbar border-t border-slate-100">
+        <button onclick="switchTab('gabung-csv')" id="tab-gabung-csv" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 tab-active">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>1. Penggabung CSV</span>
+        </button>
+
+        <button onclick="switchTab('gabung-apex')" id="tab-gabung-apex" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i class="fa-solid fa-bolt-lightning"></i>
+          <span>2. Penggabung APEX</span>
+        </button>
+
+        <button onclick="switchTab('pemisah-csv')" id="tab-pemisah-csv" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i class="fa-solid fa-scissors"></i>
+          <span>3. Pemisah CSV</span>
+        </button>
+
+        <button onclick="switchTab('pdf-sm')" id="tab-pdf-sm" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>4. PDF SM ke Excel</span>
+        </button>
+
+        <button onclick="switchTab('filter-seller')" id="tab-filter-seller" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i class="fa-solid fa-filter"></i>
+          <span>5. Auto Filter Seller</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: PENGGABUNG CSV -->
+    <!-- ========================================== -->
+    <section id="panel-gabung-csv" class="tab-panel">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Penggabung File CSV</h2>
+          <p class="text-sm text-slate-500">Gabungkan beberapa file CSV sekaligus dengan urutan file dan pilihan mode kolom.</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 self-start sm:self-auto">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Urutan: File Terlama ke Terbaru</span>
+        </div>
+      </div>
+
+      <!-- Controls & Dropzone Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Settings Card -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-indigo-600"></i>
+              <span>Pengaturan Penggabungan</span>
+            </h3>
+
+            <!-- Mode Selection -->
+            <div class="mb-4">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Mode Kolom</label>
+              <select id="csv1-mode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <option value="ALL">GABUNG SEMUANYA (Semua Kolom)</option>
+                <option value="COL_A">GABUNG KOLOM A (Hanya Kolom Pertama)</option>
+              </select>
+            </div>
+
+            <!-- Limit recent files count (optional) -->
+            <div class="mb-4">
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="block text-xs font-bold text-slate-700">Ambil N File Terakhir</label>
+                <span class="text-[11px] text-slate-400">Kosongkan untuk semua</span>
+              </div>
+              <input type="number" id="csv1-limit" placeholder="Contoh: 10 (atau biarkan kosong)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" min="1">
+            </div>
+
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200/60 text-amber-800 text-xs">
+              <i class="fa-solid fa-circle-info mr-1"></i>
+              <span>Data digabung berurutan dari baris teratas ke bawah. Header diambil dari file pertama.</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Status: <strong id="csv1-status" class="text-slate-800">Menunggu file</strong></span>
+            <button onclick="resetCsv1()" class="text-slate-400 hover:text-rose-600 transition-colors font-medium">Reset</button>
+          </div>
+        </div>
+
+        <!-- Dropzone Area -->
+        <div class="lg:col-span-2">
+          <div id="csv1-dropzone" class="border-2 border-dashed border-indigo-200 hover:border-indigo-500 rounded-3xl p-8 sm:p-12 text-center bg-white hover:bg-indigo-50/20 transition-all cursor-pointer shadow-sm group h-full flex flex-col justify-center items-center">
+            <input type="file" id="csv1-input" accept=".csv" multiple class="hidden">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-4">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h4 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Tarik & Letakkan File CSV di Sini</h4>
+            <p class="text-xs sm:text-sm text-slate-500 mb-4">Dapat memilih banyak file CSV sekaligus (.csv)</p>
+            <span class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 group-hover:bg-indigo-700 transition-colors">
+              Pilih File CSV
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- File List & Result Section -->
+      <div id="csv1-result-box" class="hidden bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base" id="csv1-result-title">File Terpilih</h3>
+            <p class="text-xs text-slate-500" id="csv1-result-subtitle">Daftar file yang siap digabungkan</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="processAndDownloadCsv1()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-download"></i>
+              <span>Gabungkan & Download (data.csv)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="csv1-file-list" class="max-h-64 overflow-y-auto space-y-2 pr-2 text-xs">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: PENGGABUNG APEX -->
+    <!-- ========================================== -->
+    <section id="panel-gabung-apex" class="tab-panel hidden">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Penggabung File APEX</h2>
+          <p class="text-sm text-slate-500">Gabungkan beberapa CSV dengan memotong otomatis hanya kolom A sampai FX (180 Kolom).</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-purple-50 text-purple-700 rounded-xl border border-purple-100 self-start sm:self-auto">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i>
+          <span>Filter: Kolom A - FX (Index 0 - 179)</span>
+        </div>
+      </div>
+
+      <!-- Controls & Dropzone Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Settings Card -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-purple-600"></i>
+              <span>Spesifikasi APEX</span>
+            </h3>
+
+            <div class="space-y-3 mb-4 text-xs text-slate-600">
+              <div class="p-3 bg-purple-50/50 rounded-2xl border border-purple-100">
+                <p class="font-bold text-purple-900 mb-1">Cakupan Kolom:</p>
+                <p>Otomatis mengambil kolom 0 sampai 179 (Kolom A s/d FX). Kolom selebihnya diabaikan.</p>
+              </div>
+
+              <!-- Limit recent files count (optional) -->
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="block text-xs font-bold text-slate-700">Ambil N File Terakhir</label>
+                  <span class="text-[11px] text-slate-400">Kosongkan untuk semua</span>
+                </div>
+                <input type="number" id="apex-limit" placeholder="Contoh: 5 (atau biarkan kosong)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none" min="1">
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Status: <strong id="apex-status" class="text-slate-800">Menunggu file</strong></span>
+            <button onclick="resetApex()" class="text-slate-400 hover:text-rose-600 transition-colors font-medium">Reset</button>
+          </div>
+        </div>
+
+        <!-- Dropzone Area -->
+        <div class="lg:col-span-2">
+          <div id="apex-dropzone" class="border-2 border-dashed border-purple-200 hover:border-purple-500 rounded-3xl p-8 sm:p-12 text-center bg-white hover:bg-purple-50/20 transition-all cursor-pointer shadow-sm group h-full flex flex-col justify-center items-center">
+            <input type="file" id="apex-input" accept=".csv" multiple class="hidden">
+            <div class="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-4">
+              <i class="fa-solid fa-file-csv"></i>
+            </div>
+            <h4 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Tarik & Letakkan File CSV APEX di Sini</h4>
+            <p class="text-xs sm:text-sm text-slate-500 mb-4">Mendukung banyak file sekaligus untuk digabung ke format Apex</p>
+            <span class="px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-purple-500/20 group-hover:bg-purple-700 transition-colors">
+              Pilih File APEX
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- File List & Result Section -->
+      <div id="apex-result-box" class="hidden bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base" id="apex-result-title">File Terpilih</h3>
+            <p class="text-xs text-slate-500" id="apex-result-subtitle">Siap diproses dan dipotong kolom A-FX</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="processAndDownloadApex()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-purple-600/20 flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-download"></i>
+              <span>Gabungkan & Download Apex (data.csv)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="apex-file-list" class="max-h-64 overflow-y-auto space-y-2 pr-2 text-xs">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: PEMISAH CSV -->
+    <!-- ========================================== -->
+    <section id="panel-pemisah-csv" class="tab-panel hidden">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Pemisah File CSV</h2>
+          <p class="text-sm text-slate-500">Bagi 1 file CSV besar menjadi N file bagian tanpa header (mulai baris ke-2), unduh dalam 1 file ZIP.</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 self-start sm:self-auto">
+          <i class="fa-solid fa-file-zipper"></i>
+          <span>Dilengkapi Auto ZIP & Multi-download</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Settings -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-gear text-emerald-600"></i>
+              <span>Opsi Pemisahan</span>
+            </h3>
+
+            <div class="mb-4">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Jumlah File Hasil Pemisahan (N)</label>
+              <input type="number" id="split-num" value="5" min="2" max="500" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <p class="text-[11px] text-slate-400 mt-1">Data akan dibagi rata tanpa header.</p>
+            </div>
+
+            <div class="p-3 bg-emerald-50/60 rounded-2xl border border-emerald-100 text-emerald-800 text-xs">
+              <i class="fa-solid fa-info-circle mr-1"></i>
+              <span>Baris pertama (header) akan di-skip, pembagian baris menggunakan pembulatan ke atas (ceil).</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Status: <strong id="split-status" class="text-slate-800">Menunggu file</strong></span>
+            <button onclick="resetSplit()" class="text-slate-400 hover:text-rose-600 transition-colors font-medium">Reset</button>
+          </div>
+        </div>
+
+        <!-- Dropzone -->
+        <div class="lg:col-span-2">
+          <div id="split-dropzone" class="border-2 border-dashed border-emerald-200 hover:border-emerald-500 rounded-3xl p-8 sm:p-12 text-center bg-white hover:bg-emerald-50/20 transition-all cursor-pointer shadow-sm group h-full flex flex-col justify-center items-center">
+            <input type="file" id="split-input" accept=".csv" class="hidden">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-4">
+              <i class="fa-solid fa-scissors"></i>
+            </div>
+            <h4 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Tarik & Letakkan File CSV di Sini</h4>
+            <p class="text-xs sm:text-sm text-slate-500 mb-4">Pilih 1 file CSV yang ingin dipisah menjadi beberapa bagian</p>
+            <span class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-500/20 group-hover:bg-emerald-700 transition-colors">
+              Pilih File CSV
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split Results -->
+      <div id="split-result-box" class="hidden bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base" id="split-result-title">Hasil Pemisahan</h3>
+            <p class="text-xs text-slate-500" id="split-result-subtitle"></p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="split-btn-zip" onclick="downloadAllSplitZip()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-file-zipper"></i>
+              <span>Download Semua Bagian (.ZIP)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="split-parts-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: PENGUBAH PDF SM KE EXCEL & ANALISA -->
+    <!-- ========================================== -->
+    <section id="panel-pdf-sm" class="tab-panel hidden">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Konverter Surat Muatan (PDF) ke Excel</h2>
+          <p class="text-sm text-slate-500">Ekstraksi otomatis Header SMU, Data Bag, Origin Mapping, Persentase Destinasi & Grafik Analisa.</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 self-start sm:self-auto">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Visual & Analytics Dashboard</span>
+        </div>
+      </div>
+
+      <!-- Dropzone -->
+      <div id="pdf-dropzone" class="border-2 border-dashed border-blue-200 hover:border-blue-500 rounded-3xl p-8 sm:p-12 text-center bg-white hover:bg-blue-50/20 transition-all cursor-pointer shadow-sm group mb-6">
+        <input type="file" id="pdf-input" accept="application/pdf" multiple class="hidden">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-4 mx-auto">
+          <i class="fa-solid fa-file-pdf"></i>
+        </div>
+        <h4 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Tarik & Letakkan File PDF Surat Muatan</h4>
+        <p class="text-xs sm:text-sm text-slate-500 mb-4">Bisa memilih banyak file PDF sekaligus (.pdf)</p>
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 group-hover:bg-blue-700 transition-colors">
+          Pilih File PDF
+        </span>
+      </div>
+
+      <!-- Action & Progress Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600" id="pdf-status">
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+          <span>Menunggu file PDF...</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="pdf-reset-btn" onclick="resetPdf()" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all">
+            Reset Data
+          </button>
+          <button id="pdf-download-btn" onclick="downloadPdfExcel()" class="hidden px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Unduh Excel (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Results & Dashboard Container -->
+      <div id="pdf-results-container" class="hidden space-y-6">
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Dokumen / SMU</p>
+            <h3 id="pdf-stat-smu" class="text-2xl font-black text-slate-800 mt-1">0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Bag No</p>
+            <h3 id="pdf-stat-bag" class="text-2xl font-black text-indigo-600 mt-1">0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Weight (Kg)</p>
+            <h3 id="pdf-stat-weight" class="text-2xl font-black text-emerald-600 mt-1">0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Destinasi</p>
+            <h3 id="pdf-stat-dest" class="text-2xl font-black text-blue-600 mt-1">0</h3>
+          </div>
+        </div>
+
+        <!-- Tables Analytics Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Origin Analysis -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
+              <h4 class="font-bold text-slate-800 text-sm">1. Analisa Origin</h4>
+              <span class="text-[11px] text-slate-400">Karawang / Cikampek / Rengasdengklok</span>
+            </div>
+            <div class="overflow-x-auto max-h-60">
+              <table id="pdf-origin-table" class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold">
+                  <tr>
+                    <th class="p-2">Kode</th>
+                    <th class="p-2">Cabang</th>
+                    <th class="p-2">Jumlah Bag</th>
+                    <th class="p-2">Berat (Kg)</th>
+                    <th class="p-2">Proporsi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Destination Analysis -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
+              <h4 class="font-bold text-slate-800 text-sm">2. Analisa Destinasi (3 Karakter)</h4>
+              <span class="text-[11px] text-slate-400">CGK, BDO, SMI, dll.</span>
+            </div>
+            <div class="overflow-x-auto max-h-60">
+              <table id="pdf-dest-table" class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold">
+                  <tr>
+                    <th class="p-2">Kode</th>
+                    <th class="p-2">Jumlah Bag</th>
+                    <th class="p-2">Persentase</th>
+                    <th class="p-2">Total Berat</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+            <h4 class="font-bold text-slate-800 text-sm mb-3">Grafik Distribusi Schedule Date</h4>
+            <div class="h-60 w-full relative">
+              <canvas id="pdf-chart-date"></canvas>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+            <h4 class="font-bold text-slate-800 text-sm mb-3">Grafik Proporsi Destinasi (%)</h4>
+            <div class="h-60 w-full relative">
+              <canvas id="pdf-chart-dest"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+          <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
+            <h4 class="font-bold text-slate-800 text-sm">Pratinjau Data (Contoh 20 Baris Pertama)</h4>
+            <span id="pdf-row-preview-count" class="text-xs text-slate-400 font-medium"></span>
+          </div>
+          <div class="overflow-x-auto max-h-96">
+            <table id="pdf-preview-table" class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="bg-slate-100 text-slate-600 sticky top-0">
+                <tr>
+                  <th class="p-2.5">No</th>
+                  <th class="p-2.5">Master Bag#</th>
+                  <th class="p-2.5">Bag No</th>
+                  <th class="p-2.5">Origin</th>
+                  <th class="p-2.5">Origin Branch</th>
+                  <th class="p-2.5">Destination</th>
+                  <th class="p-2.5">Dest Code</th>
+                  <th class="p-2.5">Weight</th>
+                  <th class="p-2.5">No Pol</th>
+                  <th class="p-2.5">No SMU</th>
+                  <th class="p-2.5">Destination (Header)</th>
+                  <th class="p-2.5">Schedule Date</th>
+                  <th class="p-2.5">Schedule No</th>
+                  <th class="p-2.5">SM Status</th>
+                  <th class="p-2.5">ETD</th>
+                  <th class="p-2.5">ETA</th>
+                  <th class="p-2.5">User</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 font-mono text-[11px]"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: AUTO FILTER SELLER -->
+    <!-- ========================================== -->
+    <section id="panel-filter-seller" class="tab-panel hidden">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Auto Filter Seller & Apex Generator</h2>
+          <p class="text-sm text-slate-500">Filter Kolom AF &rarr; Simpan Kolom A-AU + Kolom AV (Seller Fix) & Export Bahan Apex (K2).</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-violet-50 text-violet-700 rounded-xl border border-violet-100 self-start sm:self-auto">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Pemetaan Otomatis 6 Toko Seller</span>
+        </div>
+      </div>
+
+      <!-- Mapping Rules Card Accordion -->
+      <div class="mb-6 bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5">
+        <div class="flex items-center justify-between cursor-pointer" onclick="toggleSellerRules()">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-store"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm">Daftar Acuan Kata Kunci Seller (Kolom AF &rarr; AV)</h3>
+              <p class="text-xs text-slate-400">Klik untuk melihat detail pemetaan nama toko</p>
+            </div>
+          </div>
+          <button class="text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-chevron-down transition-transform" id="seller-rule-chevron"></i>
+          </button>
+        </div>
+
+        <div id="seller-rules-list" class="hidden mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Dropzone -->
+      <div id="seller-dropzone" class="border-2 border-dashed border-violet-200 hover:border-violet-500 rounded-3xl p-8 sm:p-12 text-center bg-white hover:bg-violet-50/20 transition-all cursor-pointer shadow-sm group mb-6">
+        <input type="file" id="seller-input" accept=".csv" class="hidden">
+        <div class="w-16 h-16 rounded-2xl bg-violet-50 text-violet-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-4 mx-auto">
+          <i class="fa-solid fa-file-circle-check"></i>
+        </div>
+        <h4 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Tarik & Letakkan File CSV Laporan Seller di Sini</h4>
+        <p class="text-xs sm:text-sm text-slate-500 mb-4">Pilih file CSV mentah yang ingin difilter kolom AF dan diekspor</p>
+        <span class="px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-violet-500/20 group-hover:bg-violet-700 transition-colors">
+          Pilih File CSV
+        </span>
+      </div>
+
+      <!-- Seller Stats Cards -->
+      <div id="seller-stats-box" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Baris Awal</p>
+            <p id="seller-stat-total" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">0</p>
+          </div>
+          <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600">
+            <i class="fa-solid fa-list text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-emerald-100 bg-emerald-50/20 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-emerald-600 uppercase tracking-wider">Baris Lolos Filter</p>
+            <p id="seller-stat-mapped" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+          </div>
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+            <i class="fa-solid fa-filter-circle-check text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-rose-100 bg-rose-50/20 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-rose-600 uppercase tracking-wider">Baris Dihapus</p>
+            <p id="seller-stat-unmapped" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">0</p>
+          </div>
+          <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
+            <i class="fa-solid fa-trash-can text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seller Results Table & Action Bar -->
+      <div id="seller-result-box" class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Pratinjau Hasil Laporan</h4>
+            <p class="text-xs text-slate-500">Format: Kolom A - AU (Indeks 0-46) + Kolom AV (Nama Seller Fix)</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div class="relative flex-1 sm:w-56">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="seller-search" placeholder="Cari di data..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+            </div>
+
+            <!-- Download CSV -->
+            <button onclick="downloadSellerMappedCsv()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-download"></i>
+              <span>Download CSV (A-AV)</span>
+            </button>
+
+            <!-- Download Bahan Apex -->
+            <button onclick="downloadSellerBahanApex()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Download Bahan Apex (K2)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[460px] relative">
+          <table id="seller-table" class="w-full text-left text-xs whitespace-nowrap">
+            <!-- Table generated by JS -->
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs text-slate-500">
+          <span id="seller-row-count-label">Menampilkan 0 baris</span>
+          <span>Kolom K = Bahan Apex | Kolom AF = Acuan | Kolom AV = Hasil Seller Fix</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- APP FOOTER -->
+  <footer class="bg-white border-t border-slate-200/80 py-5 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+        <span>Semua proses data berjalan 100% di browser lokal Anda tanpa dikirim ke server.</span>
+      </div>
+      <div>
+        <span>Siap di-deploy langsung ke <strong>GitHub Pages</strong>.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT APPLICATION CORE -->
+  <!-- ======================================================== -->
+  <script>
+    // --------------------------------------------------------
+    // TAB SWITCHER
+    // --------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+      
+      const targetPanel = document.getElementById(`panel-${tabId}`);
+      const targetBtn = document.getElementById(`tab-${tabId}`);
+      if (targetPanel && targetBtn) {
+        targetPanel.classList.remove('hidden');
+        targetBtn.classList.add('tab-active');
+      }
+    }
+
+    // Helper: Trigger File Download
+    function triggerDownload(content, fileName, mimeType = 'text/csv;charset=utf-8;') {
+      const blob = (content instanceof Blob) ? content : new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Helper: Format Bytes
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // --------------------------------------------------------
+    // TOOL 1: PENGGABUNG CSV
+    // --------------------------------------------------------
+    let csv1Files = [];
+
+    const csv1Dropzone = document.getElementById('csv1-dropzone');
+    const csv1Input = document.getElementById('csv1-input');
+    const csv1Status = document.getElementById('csv1-status');
+    const csv1ResultBox = document.getElementById('csv1-result-box');
+    const csv1FileList = document.getElementById('csv1-file-list');
+
+    csv1Dropzone.addEventListener('click', () => csv1Input.click());
+    setupDragDrop(csv1Dropzone, (files) => handleCsv1Files(files));
+    csv1Input.addEventListener('change', (e) => handleCsv1Files(e.target.files));
+
+    function handleCsv1Files(files) {
+      const selected = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.csv'));
+      if (selected.length === 0) return alert('Silakan pilih file berformat .csv');
+
+      // Sort by lastModified (oldest to newest) to match reversed order of Python script
+      selected.sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
+
+      const limit = parseInt(document.getElementById('csv1-limit').value, 10);
+      if (!isNaN(limit) && limit > 0 && limit < selected.length) {
+        // Take the latest N files (from the end)
+        csv1Files = selected.slice(selected.length - limit);
+      } else {
+        csv1Files = selected;
+      }
+
+      renderCsv1List();
+    }
+
+    function renderCsv1List() {
+      csv1ResultBox.classList.remove('hidden');
+      csv1Status.textContent = `${csv1Files.length} file dipilih`;
+      document.getElementById('csv1-result-title').textContent = `${csv1Files.length} File CSV Terpilih`;
+      document.getElementById('csv1-result-subtitle').textContent = `Urutan penggabungan: dari file terlama ke terbaru`;
+
+      csv1FileList.innerHTML = csv1Files.map((file, idx) => `
+        <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/70 rounded-xl hover:bg-slate-100/80 transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+            <div>
+              <p class="font-bold text-slate-800 text-xs">${file.name}</p>
+              <p class="text-[10px] text-slate-400">${formatBytes(file.size)} &bull; ${new Date(file.lastModified).toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+          <button onclick="removeCsv1File(${idx})" class="text-slate-400 hover:text-rose-600 transition-colors p-1 text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removeCsv1File(idx) {
+      csv1Files.splice(idx, 1);
+      if (csv1Files.length === 0) {
+        resetCsv1();
+      } else {
+        renderCsv1List();
+      }
+    }
+
+    function resetCsv1() {
+      csv1Files = [];
+      csv1Input.value = '';
+      csv1ResultBox.classList.add('hidden');
+      csv1Status.textContent = 'Menunggu file';
+    }
+
+    async function processAndDownloadCsv1() {
+      if (csv1Files.length === 0) return alert('Pilih setidaknya 1 file CSV!');
+
+      const mode = document.getElementById('csv1-mode').value; // 'ALL' or 'COL_A'
+      csv1Status.textContent = 'Sedang menggabungkan file...';
+
+      let combinedData = [];
+      let isFirstFile = true;
+
+      for (let i = 0; i < csv1Files.length; i++) {
+        const file = csv1Files[i];
+        const content = await readFileAsText(file);
+        const parsed = Papa.parse(content, { skipEmptyLines: 'greedy' });
+
+        if (parsed.data && parsed.data.length > 0) {
+          let rows = parsed.data;
+
+          if (mode === 'COL_A') {
+            rows = rows.map(r => [r[0] || '']);
+          }
+
+          if (isFirstFile) {
+            combinedData = rows;
+            isFirstFile = false;
+          } else {
+            // Drop header of subsequent files
+            combinedData.push(...rows.slice(1));
+          }
+        }
+      }
+
+      csv1Status.textContent = `Selesai! ${combinedData.length} total baris.`;
+      const csvOutput = Papa.unparse(combinedData);
+      triggerDownload(csvOutput, 'data.csv');
+    }
+
+    // --------------------------------------------------------
+    // TOOL 2: PENGGABUNG APEX (Kolom A-FX: Index 0 s/d 179)
+    // --------------------------------------------------------
+    let apexFiles = [];
+
+    const apexDropzone = document.getElementById('apex-dropzone');
+    const apexInput = document.getElementById('apex-input');
+    const apexStatus = document.getElementById('apex-status');
+    const apexResultBox = document.getElementById('apex-result-box');
+    const apexFileList = document.getElementById('apex-file-list');
+
+    apexDropzone.addEventListener('click', () => apexInput.click());
+    setupDragDrop(apexDropzone, (files) => handleApexFiles(files));
+    apexInput.addEventListener('change', (e) => handleApexFiles(e.target.files));
+
+    function handleApexFiles(files) {
+      const selected = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.csv'));
+      if (selected.length === 0) return alert('Silakan pilih file berformat .csv');
+
+      selected.sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
+
+      const limit = parseInt(document.getElementById('apex-limit').value, 10);
+      if (!isNaN(limit) && limit > 0 && limit < selected.length) {
+        apexFiles = selected.slice(selected.length - limit);
+      } else {
+        apexFiles = selected;
+      }
+
+      renderApexList();
+    }
+
+    function renderApexList() {
+      apexResultBox.classList.remove('hidden');
+      apexStatus.textContent = `${apexFiles.length} file dipilih`;
+      document.getElementById('apex-result-title').textContent = `${apexFiles.length} File APEX Terpilih`;
+      document.getElementById('apex-result-subtitle').textContent = `Otomatis dipotong hanya kolom 0 s/d 179 (Kolom A - FX)`;
+
+      apexFileList.innerHTML = apexFiles.map((file, idx) => `
+        <div class="flex items-center justify-between p-3 bg-purple-50/50 border border-purple-200/70 rounded-xl hover:bg-purple-100/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+            <div>
+              <p class="font-bold text-slate-800 text-xs">${file.name}</p>
+              <p class="text-[10px] text-slate-400">${formatBytes(file.size)} &bull; ${new Date(file.lastModified).toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+          <button onclick="removeApexFile(${idx})" class="text-slate-400 hover:text-rose-600 transition-colors p-1 text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removeApexFile(idx) {
+      apexFiles.splice(idx, 1);
+      if (apexFiles.length === 0) {
+        resetApex();
+      } else {
+        renderApexList();
+      }
+    }
+
+    function resetApex() {
+      apexFiles = [];
+      apexInput.value = '';
+      apexResultBox.classList.add('hidden');
+      apexStatus.textContent = 'Menunggu file';
+    }
+
+    async function processAndDownloadApex() {
+      if (apexFiles.length === 0) return alert('Pilih setidaknya 1 file CSV APEX!');
+
+      apexStatus.textContent = 'Sedang memproses dan memotong kolom A-FX...';
+
+      let combinedData = [];
+      let isFirstFile = true;
+
+      for (let i = 0; i < apexFiles.length; i++) {
+        const file = apexFiles[i];
+        const content = await readFileAsText(file);
+        const parsed = Papa.parse(content, { skipEmptyLines: 'greedy' });
+
+        if (parsed.data && parsed.data.length > 0) {
+          // Slice only columns 0 through 179 (usecols=range(180))
+          const slicedRows = parsed.data.map(row => row.slice(0, 180));
+
+          if (isFirstFile) {
+            combinedData = slicedRows;
+            isFirstFile = false;
+          } else {
+            combinedData.push(...slicedRows.slice(1));
+          }
+        }
+      }
+
+      apexStatus.textContent = `Selesai! ${combinedData.length} baris digabungkan.`;
+      const csvOutput = Papa.unparse(combinedData);
+      triggerDownload(csvOutput, 'data.csv');
+    }
+
+    // --------------------------------------------------------
+    // TOOL 3: PEMISAH CSV (Bagi N bagian tanpa header, support ZIP)
+    // --------------------------------------------------------
+    let splitFile = null;
+    let splitPartsData = []; // Array of { name, csvContent, rowsCount }
+
+    const splitDropzone = document.getElementById('split-dropzone');
+    const splitInput = document.getElementById('split-input');
+    const splitStatus = document.getElementById('split-status');
+    const splitResultBox = document.getElementById('split-result-box');
+    const splitPartsList = document.getElementById('split-parts-list');
+
+    splitDropzone.addEventListener('click', () => splitInput.click());
+    setupDragDrop(splitDropzone, (files) => {
+      if (files.length > 0) handleSplitFile(files[0]);
+    });
+    splitInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleSplitFile(e.target.files[0]);
+    });
+
+    function handleSplitFile(file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) return alert('Pilih file berekstensi .csv');
+      splitFile = file;
+      splitStatus.textContent = `File: ${file.name} (${formatBytes(file.size)})`;
+      processSplit();
+    }
+
+    async function processSplit() {
+      if (!splitFile) return;
+
+      const numFilesInput = document.getElementById('split-num').value;
+      const numFiles = parseInt(numFilesInput, 10);
+      if (isNaN(numFiles) || numFiles < 2) return alert('Jumlah file pemisahan minimal 2');
+
+      splitStatus.textContent = 'Membaca dan membagi data...';
+
+      const content = await readFileAsText(splitFile);
+      const parsed = Papa.parse(content, { skipEmptyLines: 'greedy' });
+      const allRows = parsed.data || [];
+
+      if (allRows.length <= 1) {
+        alert('File CSV tidak memiliki data baris yang cukup.');
+        resetSplit();
+        return;
+      }
+
+      // Skip header: start from row index 1 (mulai dari baris ke-2)
+      const dataRows = allRows.slice(1);
+      const totalRows = dataRows.length;
+
+      if (numFiles > totalRows) {
+        alert(`Jumlah file (${numFiles}) lebih besar dari jumlah baris data (${totalRows}).`);
+        resetSplit();
+        return;
+      }
+
+      const rowsPerFile = Math.ceil(totalRows / numFiles);
+      const baseName = splitFile.name.replace(/\.[^/.]+$/, "");
+
+      splitPartsData = [];
+
+      for (let i = 0; i < numFiles; i++) {
+        const start = i * rowsPerFile;
+        const end = start + rowsPerFile;
+        const partRows = dataRows.slice(start, end);
+
+        if (partRows.length === 0) break;
+
+        const partCsv = Papa.unparse(partRows, { header: false });
+        const partName = `${baseName}_part${i + 1}.csv`;
+
+        splitPartsData.push({
+          name: partName,
+          content: partCsv,
+          rowsCount: partRows.length
+        });
+      }
+
+      renderSplitResults(baseName, totalRows, rowsPerFile);
+    }
+
+    function renderSplitResults(baseName, totalRows, rowsPerFile) {
+      splitResultBox.classList.remove('hidden');
+      splitStatus.textContent = `Sukses membagi menjadi ${splitPartsData.length} file!`;
+      document.getElementById('split-result-title').textContent = `${baseName} (${totalRows.toLocaleString()} Baris Data)`;
+      document.getElementById('split-result-subtitle').textContent = `Dibagi menjadi ${splitPartsData.length} file (Rata-rata ~${rowsPerFile.toLocaleString()} baris/file tanpa header)`;
+
+      splitPartsList.innerHTML = splitPartsData.map((part, idx) => `
+        <div class="p-4 bg-emerald-50/40 border border-emerald-200/70 rounded-2xl flex flex-col justify-between">
+          <div class="mb-3">
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-mono text-[10px] font-bold">BAGIAN ${idx + 1}</span>
+            <p class="font-bold text-slate-800 text-xs mt-1 truncate" title="${part.name}">${part.name}</p>
+            <p class="text-[11px] text-slate-500">${part.rowsCount.toLocaleString()} Baris</p>
+          </div>
+          <button onclick="downloadSingleSplitPart(${idx})" class="w-full py-2 bg-white hover:bg-emerald-600 hover:text-white border border-emerald-300 text-emerald-700 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-download"></i>
+            <span>Unduh File</span>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function downloadSingleSplitPart(idx) {
+      const part = splitPartsData[idx];
+      if (part) {
+        triggerDownload(part.content, part.name);
+      }
+    }
+
+    async function downloadAllSplitZip() {
+      if (splitPartsData.length === 0) return alert('Tidak ada file bagian untuk diunduh.');
+
+      const zip = new JSZip();
+      splitPartsData.forEach(p => {
+        zip.file(p.name, p.content);
+      });
+
+      splitStatus.textContent = 'Mengompresi ke file .ZIP...';
+      const baseName = splitFile ? splitFile.name.replace(/\.[^/.]+$/, "") : "split_csv";
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      triggerDownload(zipBlob, `${baseName}_split.zip`, 'application/zip');
+      splitStatus.textContent = 'ZIP berhasil diunduh!';
+    }
+
+    function resetSplit() {
+      splitFile = null;
+      splitPartsData = [];
+      splitInput.value = '';
+      splitResultBox.classList.add('hidden');
+      splitStatus.textContent = 'Menunggu file';
+    }
+
+    // --------------------------------------------------------
+    // TOOL 4: PENGUBAH PDF SM KE EXCEL & ANALISA
+    // --------------------------------------------------------
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const ORIGIN_NAMES = {
+      'KRW10000': 'KARAWANG',
+      'KRW10003': 'CIKAMPEK',
+      'KRW10012': 'RENGASDENGKLOK'
+    };
+
+    let pdfMasterRows = [];
+    let pdfChartDateInst = null;
+    let pdfChartDestInst = null;
+
+    const pdfDropzone = document.getElementById('pdf-dropzone');
+    const pdfInput = document.getElementById('pdf-input');
+    const pdfStatus = document.getElementById('pdf-status');
+    const pdfResetBtn = document.getElementById('pdf-reset-btn');
+    const pdfDownloadBtn = document.getElementById('pdf-download-btn');
+    const pdfResultsContainer = document.getElementById('pdf-results-container');
+
+    pdfDropzone.addEventListener('click', () => pdfInput.click());
+    setupDragDrop(pdfDropzone, (files) => processPdfFiles(files));
+    pdfInput.addEventListener('change', (e) => processPdfFiles(e.target.files));
+
+    async function processPdfFiles(files) {
+      const pdfFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+      if (pdfFiles.length === 0) return alert('Harap pilih file berekstensi .pdf!');
+
+      pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span><span>Memproses 0 dari ${pdfFiles.length} file PDF...</span>`;
+      pdfMasterRows = [];
+
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const file = pdfFiles[i];
+        pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-spin"></span><span>Memproses (${i + 1}/${pdfFiles.length}): ${file.name}...</span>`;
+        try {
+          const rows = await parseSinglePdf(file);
+          pdfMasterRows = pdfMasterRows.concat(rows);
+        } catch (err) {
+          console.error(`Gagal parsing PDF ${file.name}:`, err);
+        }
+      }
+
+      if (pdfMasterRows.length === 0) {
+        pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span>Tidak ada data yang berhasil diekstrak.</span>`;
+        return;
+      }
+
+      pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Berhasil memproses ${pdfFiles.length} file (${pdfMasterRows.length} total bag).</span>`;
+      pdfResetBtn.classList.remove('hidden');
+      pdfDownloadBtn.classList.remove('hidden');
+      pdfResultsContainer.classList.remove('hidden');
+
+      renderPdfAnalytics(pdfMasterRows);
+    }
+
+    async function parseSinglePdf(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      // Extract Header from Page 1
+      const firstPage = await pdf.getPage(1);
+      const firstContent = await firstPage.getTextContent();
+      const headerInfo = extractPdfHeaderInfo(firstContent.items);
+
+      const rows = [];
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const textContent = await page.getTextContent();
+        const pageRows = extractPdfTableRows(textContent.items, headerInfo);
+        rows.push(...pageRows);
+      }
+      return rows;
+    }
+
+    function formatPdfDateTime(str) {
+      if (!str) return '';
+      const m = str.match(/(\d{1,2})-([A-Za-z]{3})-(\d{2,4})\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+      if (!m) return str.trim();
+
+      const day = parseInt(m[1], 10);
+      const monStr = m[2].toUpperCase();
+      const year = m[3].length === 4 ? m[3].slice(-2) : m[3];
+      let hour = parseInt(m[4], 10);
+      const min = m[5];
+      const ampm = m[6] ? m[6].toUpperCase() : '';
+
+      const months = { 'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, 'MAY':5, 'JUN':6, 'JUL':7, 'AUG':8, 'SEP':9, 'OCT':10, 'NOV':11, 'DEC':12 };
+      const month = months[monStr] || 11;
+
+      if (ampm === 'PM' && hour < 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+
+      return `${month}/${day}/${year} ${hour}:${min}`;
+    }
+
+    function formatPdfScheduleDate(str) {
+      if (!str) return '';
+      const m = str.match(/(\d{1,2})-([A-Za-z]{3})-(\d{2,4})/i);
+      if (!m) return str.trim();
+      const day = m[1];
+      const mon = m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase();
+      const year = m[3].length === 4 ? m[3].slice(-2) : m[3];
+      return `${day}-${mon}-${year}`;
+    }
+
+    function extractPdfHeaderInfo(items) {
+      const yTol = 6;
+      const lines = [];
+
+      items.forEach(item => {
+        const text = item.str.trim();
+        if (!text) return;
+        const x = item.transform[4];
+        const y = item.transform[5];
+
+        let line = lines.find(l => Math.abs(l.y - y) <= yTol);
+        if (!line) {
+          line = { y: y, items: [] };
+          lines.push(line);
+        }
+        line.items.push({ x, text });
+      });
+
+      lines.sort((a, b) => b.y - a.y);
+      lines.forEach(l => l.items.sort((a, b) => a.x - b.x));
+
+      let info = {
+        noSmu: '', destHeader: '', scheduleDate: '', scheduleNo: '', smStatus: '', etd: '', eta: '', user: ''
+      };
+
+      function getValueAfter(line, keywordList, stopWordsList = []) {
+        const tokens = line.items.map(i => i.text);
+        for (let i = 0; i < tokens.length; i++) {
+          const tokenLower = tokens[i].toLowerCase().replace(':', '').trim();
+          if (keywordList.includes(tokenLower)) {
+            const results = [];
+            for (let j = i + 1; j < tokens.length; j++) {
+              const nextToken = tokens[j];
+              const nextLower = nextToken.toLowerCase().replace(':', '').trim();
+              if (stopWordsList.includes(nextLower)) break;
+              if (nextToken === ':') continue;
+              const clean = nextToken.replace(/^[:\s]+/, '').trim();
+              if (clean) results.push(clean);
+            }
+            return results.join(' ').trim();
+          }
+        }
+        return null;
+      }
+
+      lines.forEach(line => {
+        const lineText = line.items.map(i => i.text).join(' ');
+
+        if (/No\s*SMU/i.test(lineText) && !info.noSmu) {
+          let val = getValueAfter(line, ['smu', 'no smu'], ['etd']);
+          if (!val) {
+            const m = lineText.match(/No\s*SMU\s*[:\s]+([A-Za-z0-9]+)/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([A-Z0-9]+)/i);
+            if (m) info.noSmu = m[1];
+          }
+        }
+
+        if (/\bETD\b/i.test(lineText) && !info.etd) {
+          let val = getValueAfter(line, ['etd']);
+          if (!val) {
+            const m = lineText.match(/\bETD\s*[:\s]+([0-9]{1,2}-[A-Za-z]{3}-[0-9]{2,4}\s+[0-9]{1,2}:[0-9]{2}\s*(?:AM|PM)?)/i);
+            if (m) val = m[1];
+          }
+          if (val) info.etd = val;
+        }
+
+        if (/Destination/i.test(lineText) && !/Bag\s*No|Origin/i.test(lineText) && !info.destHeader) {
+          let val = getValueAfter(line, ['destination'], ['eta']);
+          if (!val) {
+            const m = lineText.match(/Destination\s*[:\s]+([A-Za-z0-9]+)/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([A-Z0-9]+)/i);
+            if (m) info.destHeader = m[1];
+          }
+        }
+
+        if (/\bETA\b/i.test(lineText) && !info.eta) {
+          let val = getValueAfter(line, ['eta']);
+          if (!val) {
+            const m = lineText.match(/\bETA\s*[:\s]+([0-9]{1,2}-[A-Za-z]{3}-[0-9]{2,4}\s+[0-9]{1,2}:[0-9]{2}\s*(?:AM|PM)?)/i);
+            if (m) val = m[1];
+          }
+          if (val) info.eta = val;
+        }
+
+        if (/Schedule\s*Date/i.test(lineText) && !info.scheduleDate) {
+          let val = getValueAfter(line, ['date', 'schedule date'], ['user']);
+          if (!val) {
+            const m = lineText.match(/Schedule\s*Date\s*[:\s]+([0-9]{1,2}-[A-Za-z]{3}-[0-9]{2,4})/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([0-9]{1,2}-[A-Za-z]{3}-[0-9]{2,4})/i);
+            if (m) info.scheduleDate = m[1];
+          }
+        }
+
+        if (/\bUser\b/i.test(lineText) && !info.user) {
+          let val = getValueAfter(line, ['user'], ['qty']);
+          if (!val) {
+            const m = lineText.match(/\bUser\s*[:\s]+([A-Za-z0-9_\-\.]+)/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([A-Za-z0-9_\-\.]+)/i);
+            if (m) info.user = m[1];
+          }
+        }
+
+        if (/Schedule\s*No/i.test(lineText) && !info.scheduleNo) {
+          let val = getValueAfter(line, ['no', 'schedule no'], ['qty']);
+          if (!val) {
+            const m = lineText.match(/Schedule\s*No\s*[:\s]+([A-Za-z0-9]+)/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([A-Z0-9]+)/i);
+            if (m) info.scheduleNo = m[1];
+          }
+        }
+
+        if (/SM\s*Status/i.test(lineText) && !info.smStatus) {
+          let val = getValueAfter(line, ['status', 'sm status'], ['weight']);
+          if (!val) {
+            const m = lineText.match(/SM\s*Status\s*[:\s]+([A-Za-z0-9]+)/i);
+            if (m) val = m[1];
+          }
+          if (val) {
+            const m = val.match(/([A-Z0-9]+)/i);
+            if (m) info.smStatus = m[1];
+          }
+        }
+      });
+
+      return {
+        noSmu: info.noSmu || '-',
+        destHeader: info.destHeader || '-',
+        scheduleDate: formatPdfScheduleDate(info.scheduleDate),
+        scheduleNo: info.scheduleNo || '-',
+        smStatus: info.smStatus || '-',
+        etd: formatPdfDateTime(info.etd),
+        eta: formatPdfDateTime(info.eta),
+        user: info.user || '-'
+      };
+    }
+
+    function extractPdfTableRows(items, headerInfo) {
+      const yTol = 4;
+      const lines = [];
+
+      items.forEach(item => {
+        const text = item.str.trim();
+        if (!text) return;
+        const x = item.transform[4];
+        const y = item.transform[5];
+
+        let line = lines.find(l => Math.abs(l.y - y) <= yTol);
+        if (!line) {
+          line = { y: y, items: [] };
+          lines.push(line);
+        }
+        line.items.push({ x, text });
+      });
+
+      lines.sort((a, b) => b.y - a.y);
+
+      const rows = [];
+      let isTableSection = false;
+
+      for (const line of lines) {
+        line.items.sort((a, b) => a.x - b.x);
+        const lineStr = line.items.map(i => i.text).join(' ');
+
+        if (lineStr.includes('Bag No') && lineStr.includes('Origin') && lineStr.includes('Destination')) {
+          isTableSection = true;
+          continue;
+        }
+
+        if (!isTableSection) continue;
+
+        if (lineStr.includes('Total') || lineStr.includes('Dibuat Oleh') || lineStr.includes('SURAT MUATAN')) {
+          isTableSection = false;
+          continue;
+        }
+
+        const tokens = line.items.map(i => i.text);
+
+        if (tokens.length >= 5 && /^\d+$/.test(tokens[0])) {
+          const no = tokens[0];
+          const isStationCode = (str) => /^[A-Za-z]{3}\d{3,5}$/.test(str);
+          const isKnownOrigin = (str) => !!ORIGIN_NAMES[str] || /^KRW\d{3,5}$/i.test(str);
+
+          let originIdx = -1;
+
+          for (let i = 1; i < tokens.length; i++) {
+            if (isKnownOrigin(tokens[i])) { originIdx = i; break; }
+          }
+
+          if (originIdx === -1) {
+            for (let i = 1; i < tokens.length - 1; i++) {
+              if (isStationCode(tokens[i]) && isStationCode(tokens[i + 1])) { originIdx = i; break; }
+            }
+          }
+
+          if (originIdx === -1) {
+            for (let i = 1; i < tokens.length; i++) {
+              if (isStationCode(tokens[i])) { originIdx = i; break; }
+            }
+          }
+
+          if (originIdx > 0) {
+            const origin = tokens[originIdx];
+            const destination = tokens[originIdx + 1] || '';
+            const weight = parseFloat(tokens[originIdx + 2]) || 0;
+            const noPol = tokens.slice(originIdx + 3).join(' ');
+
+            let masterBag = '';
+            let bagNo = '';
+
+            if (originIdx === 2) {
+              masterBag = '';
+              bagNo = tokens[1];
+            } else if (originIdx >= 3) {
+              masterBag = tokens[1];
+              bagNo = tokens[2];
+            }
+
+            const originBranch = ORIGIN_NAMES[origin] || origin;
+            const destCode = (destination || '').substring(0, 3).toUpperCase();
+
+            rows.push({
+              no,
+              masterBag,
+              bagNo,
+              origin,
+              originBranch,
+              destination,
+              destCode,
+              weight,
+              noPol,
+              noSmu: headerInfo.noSmu,
+              destinationHeader: headerInfo.destHeader,
+              scheduleDate: headerInfo.scheduleDate,
+              scheduleNo: headerInfo.scheduleNo,
+              smStatus: headerInfo.smStatus,
+              etd: headerInfo.etd,
+              eta: headerInfo.eta,
+              user: headerInfo.user
+            });
+          }
+        }
+      }
+      return rows;
+    }
+
+    function renderPdfAnalytics(data) {
+      const totalBag = data.length;
+      let totalWeight = 0;
+      const smuSet = new Set();
+      const originMap = {};
+      const dest3Map = {};
+      const dateMap = {};
+
+      data.forEach(row => {
+        totalWeight += Number(row.weight) || 0;
+        if (row.noSmu && row.noSmu !== '-') smuSet.add(row.noSmu);
+
+        const orig = row.origin || 'LAINNYA';
+        if (!originMap[orig]) {
+          originMap[orig] = { name: row.originBranch || orig, count: 0, weight: 0 };
+        }
+        originMap[orig].count += 1;
+        originMap[orig].weight += Number(row.weight) || 0;
+
+        let dCode = row.destCode || 'OTH';
+        if (!dest3Map[dCode]) dest3Map[dCode] = { count: 0, weight: 0 };
+        dest3Map[dCode].count += 1;
+        dest3Map[dCode].weight += Number(row.weight) || 0;
+
+        const sDate = row.scheduleDate || 'No Date';
+        dateMap[sDate] = (dateMap[sDate] || 0) + 1;
+      });
+
+      document.getElementById('pdf-stat-smu').textContent = smuSet.size || 1;
+      document.getElementById('pdf-stat-bag').textContent = totalBag.toLocaleString('id-ID');
+      document.getElementById('pdf-stat-weight').textContent = totalWeight.toLocaleString('id-ID') + ' Kg';
+      document.getElementById('pdf-stat-dest').textContent = Object.keys(dest3Map).length;
+
+      // Origin Table
+      const originTbody = document.querySelector('#pdf-origin-table tbody');
+      originTbody.innerHTML = Object.keys(originMap).map(code => {
+        const item = originMap[code];
+        const pct = ((item.count / totalBag) * 100).toFixed(1);
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-2 font-mono font-bold text-indigo-700">${code}</td>
+            <td class="p-2 font-medium">${item.name}</td>
+            <td class="p-2 font-semibold">${item.count} Bag</td>
+            <td class="p-2">${item.weight} Kg</td>
+            <td class="p-2 font-bold text-slate-700">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Dest Table
+      const destTbody = document.querySelector('#pdf-dest-table tbody');
+      const sortedDest = Object.keys(dest3Map).sort((a,b) => dest3Map[b].count - dest3Map[a].count);
+      destTbody.innerHTML = sortedDest.map(code => {
+        const item = dest3Map[code];
+        const pct = ((item.count / totalBag) * 100).toFixed(1);
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-2 font-mono font-bold text-blue-700">${code}</td>
+            <td class="p-2 font-semibold">${item.count} BAG</td>
+            <td class="p-2 font-bold text-slate-700">${pct}%</td>
+            <td class="p-2">${item.weight} Kg</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Preview Table
+      const previewTbody = document.querySelector('#pdf-preview-table tbody');
+      document.getElementById('pdf-row-preview-count').textContent = `Menampilkan ${Math.min(data.length, 20)} dari total ${data.length} baris`;
+      previewTbody.innerHTML = data.slice(0, 20).map(r => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2">${r.no}</td>
+          <td class="p-2">${r.masterBag}</td>
+          <td class="p-2">${r.bagNo}</td>
+          <td class="p-2">${r.origin}</td>
+          <td class="p-2 font-semibold">${r.originBranch}</td>
+          <td class="p-2">${r.destination}</td>
+          <td class="p-2 font-bold text-blue-600">${r.destCode}</td>
+          <td class="p-2">${r.weight}</td>
+          <td class="p-2">${r.noPol}</td>
+          <td class="p-2 font-semibold">${r.noSmu}</td>
+          <td class="p-2">${r.destinationHeader}</td>
+          <td class="p-2">${r.scheduleDate}</td>
+          <td class="p-2">${r.scheduleNo}</td>
+          <td class="p-2">${r.smStatus}</td>
+          <td class="p-2">${r.etd}</td>
+          <td class="p-2">${r.eta}</td>
+          <td class="p-2">${r.user}</td>
+        </tr>
+      `).join('');
+
+      renderPdfCharts(dateMap, dest3Map, totalBag);
+    }
+
+    function renderPdfCharts(dateMap, dest3Map, totalBag) {
+      if (pdfChartDateInst) pdfChartDateInst.destroy();
+      if (pdfChartDestInst) pdfChartDestInst.destroy();
+
+      const dateCtx = document.getElementById('pdf-chart-date').getContext('2d');
+      pdfChartDateInst = new Chart(dateCtx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(dateMap),
+          datasets: [{
+            label: 'Jumlah Bag',
+            data: Object.values(dateMap),
+            backgroundColor: '#4f46e5',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+
+      const destCtx = document.getElementById('pdf-chart-dest').getContext('2d');
+      const sortedDest = Object.keys(dest3Map).sort((a,b) => dest3Map[b].count - dest3Map[a].count);
+      const topDest = sortedDest.slice(0, 6);
+      const topLabels = topDest.map(code => {
+        const pct = ((dest3Map[code].count / totalBag) * 100).toFixed(1);
+        return `${code} (${pct}%)`;
+      });
+      const topData = topDest.map(code => dest3Map[code].count);
+
+      pdfChartDestInst = new Chart(destCtx, {
+        type: 'doughnut',
+        data: {
+          labels: topLabels,
+          datasets: [{
+            data: topData,
+            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right' } }
+        }
+      });
+    }
+
+    function downloadPdfExcel() {
+      if (pdfMasterRows.length === 0) return alert('Tidak ada data PDF untuk diunduh.');
+
+      const excelRows = pdfMasterRows.map(r => ({
+        "No": r.no,
+        "Master Bag#": r.masterBag,
+        "Bag No": r.bagNo,
+        "Origin": r.origin,
+        "Origin Branch": r.originBranch,
+        "Destination": r.destination,
+        "Dest Code (3 Char)": r.destCode,
+        "Weight": r.weight,
+        "No Pol": r.noPol,
+        "No SMU": r.noSmu,
+        "Destination (Header)": r.destinationHeader,
+        "Schedule Date": r.scheduleDate,
+        "Schedule No": r.scheduleNo,
+        "SM Status": r.smStatus,
+        "ETD": r.etd,
+        "ETA": r.eta,
+        "User": r.user
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const wsData = XLSX.utils.json_to_sheet(excelRows);
+      XLSX.utils.book_append_sheet(wb, wsData, "Data Gabungan SMU");
+
+      // Sheet 2: Ringkasan Analisa
+      const summaryRows = [];
+      summaryRows.push({ "Kategori": "=== ANALISA ORIGIN ===", "Detail": "", "Jumlah BAG": "", "Weight (Kg)": "", "Persentase": "" });
+
+      const originMap = {};
+      pdfMasterRows.forEach(r => {
+        const org = r.origin || 'LAINNYA';
+        if (!originMap[org]) originMap[org] = { name: r.originBranch || org, count: 0, weight: 0 };
+        originMap[org].count += 1;
+        originMap[org].weight += Number(r.weight) || 0;
+      });
+
+      Object.keys(originMap).forEach(code => {
+        const item = originMap[code];
+        summaryRows.push({
+          "Kategori": code,
+          "Detail": item.name,
+          "Jumlah BAG": item.count,
+          "Weight (Kg)": item.weight,
+          "Persentase": ((item.count / pdfMasterRows.length) * 100).toFixed(1) + "%"
+        });
+      });
+
+      summaryRows.push({});
+      summaryRows.push({ "Kategori": "=== ANALISA DESTINASI (3 KATA PERTAMA) ===", "Detail": "", "Jumlah BAG": "", "Weight (Kg)": "", "Persentase": "" });
+
+      const destMap = {};
+      pdfMasterRows.forEach(r => {
+        const dCode = r.destCode || 'OTH';
+        if (!destMap[dCode]) destMap[dCode] = { count: 0, weight: 0 };
+        destMap[dCode].count += 1;
+        destMap[dCode].weight += Number(r.weight) || 0;
+      });
+
+      Object.keys(destMap).sort((a,b) => destMap[b].count - destMap[a].count).forEach(code => {
+        const item = destMap[code];
+        summaryRows.push({
+          "Kategori": code,
+          "Detail": "Destinasi " + code,
+          "Jumlah BAG": item.count,
+          "Weight (Kg)": item.weight,
+          "Persentase": ((item.count / pdfMasterRows.length) * 100).toFixed(1) + "%"
+        });
+      });
+
+      const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan Analisa");
+
+      const today = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `Surat_Muatan_Combined_${today}.xlsx`);
+    }
+
+    function resetPdf() {
+      pdfMasterRows = [];
+      pdfInput.value = '';
+      pdfResultsContainer.classList.add('hidden');
+      pdfResetBtn.classList.add('hidden');
+      pdfDownloadBtn.classList.add('hidden');
+      pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span>Menunggu file PDF...</span>`;
+      if (pdfChartDateInst) pdfChartDateInst.destroy();
+      if (pdfChartDestInst) pdfChartDestInst.destroy();
+    }
+
+    // --------------------------------------------------------
+    // TOOL 5: AUTO FILTER SELLER
+    // --------------------------------------------------------
+    const SELLER_MAPPING_RULES = [
+      { sellerFix: "AFA TOYS", targets: ["AFA TOYS GUDANG BONEKA", "(AFA TOYS)", "AFA TOYS (Toko Boneka)"] },
+      { sellerFix: "PAYUWAE", targets: ["Yudi Gunawan", "YUDI GUNAWAN", "BONEKA PAYUWAE", "Boneka Sirah"] },
+      { sellerFix: "Juyo Food", targets: ["ingsun"] },
+      { sellerFix: "Kenan Hijab", targets: ["FITRI HANDAYANI"] },
+      { sellerFix: "Widia boneka", targets: ["Widia Boneka", "TOKO WIDIA BONEKA", "WIDIASTUTI SURYA NINGRUM", "DIANA", "nurdin hidayat"] },
+      { sellerFix: "LEPETITE", targets: ["LePetite Official", "LEPETITE", "GUDANG MAYBEE"] }
+    ];
+
+    const TARGET_MAP = {};
+    SELLER_MAPPING_RULES.forEach(rule => {
+      rule.targets.forEach(target => {
+        TARGET_MAP[target.trim().toLowerCase()] = rule.sellerFix;
+      });
+    });
+
+    let sellerBaseName = "laporan";
+    let sellerHeaderRow = [];
+    let sellerFilteredRows = [];
+
+    const sellerDropzone = document.getElementById('seller-dropzone');
+    const sellerInput = document.getElementById('seller-input');
+    const sellerStatsBox = document.getElementById('seller-stats-box');
+    const sellerResultBox = document.getElementById('seller-result-box');
+    const sellerTable = document.getElementById('seller-table');
+    const sellerSearch = document.getElementById('seller-search');
+
+    sellerDropzone.addEventListener('click', () => sellerInput.click());
+    setupDragDrop(sellerDropzone, (files) => {
+      if (files.length > 0) handleSellerFile(files[0]);
+    });
+    sellerInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleSellerFile(e.target.files[0]);
+    });
+
+    sellerSearch.addEventListener('input', () => {
+      renderSellerTableBody(sellerFilteredRows, sellerSearch.value);
+    });
+
+    function toggleSellerRules() {
+      const container = document.getElementById('seller-rules-list');
+      const chevron = document.getElementById('seller-rule-chevron');
+      container.classList.toggle('hidden');
+      chevron.classList.toggle('rotate-180');
+    }
+
+    function renderSellerRulesList() {
+      const container = document.getElementById('seller-rules-list');
+      container.innerHTML = SELLER_MAPPING_RULES.map(rule => `
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div class="font-bold text-violet-700 text-xs mb-1 flex items-center justify-between">
+            <span>AV: "${rule.sellerFix}"</span>
+            <span class="bg-violet-100 text-violet-800 text-[10px] px-2 py-0.5 rounded-full">${rule.targets.length} Nama</span>
+          </div>
+          <ul class="list-disc list-inside text-[11px] text-slate-600 space-y-0.5">
+            ${rule.targets.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+    }
+
+    function handleSellerFile(file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) return alert('Silakan upload file berformat .csv');
+      sellerBaseName = file.name.replace(/\.[^/.]+$/, "");
+
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: 'greedy',
+        complete: function(results) {
+          processSellerCSV(results.data);
+        },
+        error: function(err) {
+          alert('Gagal membaca CSV: ' + err.message);
+        }
+      });
+    }
+
+    function processSellerCSV(rows) {
+      if (!rows || rows.length === 0) return alert('File CSV kosong.');
+
+      const COLUMN_AF_INDEX = 31; // AF = 31
+      const COLUMN_AU_INDEX = 46; // AU = 46
+      const COLUMN_AV_INDEX = 47; // AV = 47
+
+      // Slice A to AU (0..46)
+      const rawHeader = rows[0].slice(0, COLUMN_AU_INDEX + 1);
+      while (rawHeader.length <= COLUMN_AU_INDEX) {
+        rawHeader.push(`Kolom_${rawHeader.length + 1}`);
+      }
+      sellerHeaderRow = [...rawHeader];
+      sellerHeaderRow[COLUMN_AV_INDEX] = "Nama Seller Fix";
+
+      const totalRows = rows.length - 1;
+      let keptCount = 0;
+      let deletedCount = 0;
+      let filtered = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const fullRow = rows[i];
+        const afValue = fullRow[COLUMN_AF_INDEX] ? String(fullRow[COLUMN_AF_INDEX]).trim() : '';
+        const normAf = afValue.toLowerCase();
+
+        if (TARGET_MAP.hasOwnProperty(normAf)) {
+          let sliced = fullRow.slice(0, COLUMN_AU_INDEX + 1);
+          while (sliced.length <= COLUMN_AU_INDEX) sliced.push('');
+          sliced[COLUMN_AV_INDEX] = TARGET_MAP[normAf];
+          filtered.push(sliced);
+          keptCount++;
+        } else {
+          deletedCount++;
+        }
+      }
+
+      sellerFilteredRows = filtered;
+
+      document.getElementById('seller-stat-total').textContent = totalRows.toLocaleString('id-ID');
+      document.getElementById('seller-stat-mapped').textContent = keptCount.toLocaleString('id-ID');
+      document.getElementById('seller-stat-unmapped').textContent = deletedCount.toLocaleString('id-ID');
+
+      renderSellerTable(sellerHeaderRow, sellerFilteredRows);
+
+      sellerStatsBox.classList.remove('hidden');
+      sellerResultBox.classList.remove('hidden');
+    }
+
+    function renderSellerTable(headers, rows) {
+      const getColLetter = (n) => {
+        let ordA = 'A'.charCodeAt(0), ordZ = 'Z'.charCodeAt(0);
+        let len = ordZ - ordA + 1, str = "";
+        while (n >= 0) {
+          str = String.fromCharCode(n % len + ordA) + str;
+          n = Math.floor(n / len) - 1;
+        }
+        return str;
+      };
+
+      let theadHtml = `
+        <thead class="bg-slate-100 sticky top-0 border-b border-slate-200 z-10">
+          <tr>
+            <th class="py-2.5 px-3 font-semibold text-slate-500 border-r border-slate-200 text-center">#</th>
+      `;
+
+      headers.forEach((h, idx) => {
+        const colLetter = getColLetter(idx);
+        const isK = idx === 10;
+        const isAF = idx === 31;
+        const isAV = idx === 47;
+
+        let thClass = 'text-slate-700';
+        if (isK) thClass = 'bg-purple-100 text-purple-900 border-b-2 border-purple-500';
+        else if (isAF) thClass = 'bg-indigo-100 text-indigo-900 border-b-2 border-indigo-500';
+        else if (isAV) thClass = 'bg-emerald-100 text-emerald-900 border-b-2 border-emerald-500';
+
+        theadHtml += `
+          <th class="py-2.5 px-3 font-semibold whitespace-nowrap ${thClass}">
+            <div class="flex flex-col">
+              <span class="text-[10px] text-slate-400 font-mono">${colLetter} ${isK ? '(Apex K2)' : (isAF ? '(Acuan AF)' : (isAV ? '(Hasil AV)' : ''))}</span>
+              <span>${escapeHtml(h)}</span>
+            </div>
+          </th>
+        `;
+      });
+      theadHtml += `</tr></thead>`;
+
+      sellerTable.innerHTML = theadHtml + `<tbody id="seller-tbody" class="divide-y divide-slate-100"></tbody>`;
+      renderSellerTableBody(rows, '');
+    }
+
+    function renderSellerTableBody(rows, query) {
+      const tbody = document.getElementById('seller-tbody');
+      if (!tbody) return;
+
+      const q = query.trim().toLowerCase();
+      let displayRows = rows;
+      if (q) {
+        displayRows = rows.filter(r => r.some(cell => String(cell).toLowerCase().includes(q)));
+      }
+
+      document.getElementById('seller-row-count-label').textContent = `Menampilkan ${displayRows.length.toLocaleString('id-ID')} baris ${q ? '(difilter)' : ''}`;
+
+      if (displayRows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="100" class="text-center py-8 text-slate-400">Tidak ada baris yang cocok.</td></tr>`;
+        return;
+      }
+
+      const previewRows = displayRows.slice(0, 80);
+      let html = '';
+      previewRows.forEach((r, rIdx) => {
+        html += `<tr class="hover:bg-slate-50 transition-colors">`;
+        html += `<td class="py-2 px-3 text-center font-mono text-[11px] text-slate-400 bg-slate-50/50 border-r border-slate-100">${rIdx + 1}</td>`;
+
+        r.forEach((cell, cIdx) => {
+          const isK = cIdx === 10;
+          const isAF = cIdx === 31;
+          const isAV = cIdx === 47;
+
+          let cellClass = 'text-slate-700';
+          if (isK) cellClass = 'bg-purple-50/60 font-medium text-purple-900';
+          else if (isAF) cellClass = 'bg-indigo-50/50 font-medium text-indigo-900';
+          else if (isAV) cellClass = 'bg-emerald-50 font-bold text-emerald-800';
+
+          html += `<td class="py-2 px-3 whitespace-nowrap ${cellClass}">${escapeHtml(String(cell || ''))}</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      if (displayRows.length > 80) {
+        html += `<tr><td colspan="100" class="text-center py-3 bg-slate-50 text-slate-500 text-xs italic">+ ${displayRows.length - 80} baris lainnya disembunyikan dari pratinjau (semua baris tetap tercakup saat download).</td></tr>`;
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    function downloadSellerMappedCsv() {
+      if (sellerFilteredRows.length === 0) return alert('Tidak ada data untuk diunduh.');
+      const exportArr = [sellerHeaderRow, ...sellerFilteredRows];
+      const csv = Papa.unparse(exportArr);
+      triggerDownload(csv, `${sellerBaseName}_filtered_A-AV.csv`);
+    }
+
+    function downloadSellerBahanApex() {
+      if (sellerFilteredRows.length === 0) return alert('Tidak ada data untuk diunduh.');
+      const apexVals = sellerFilteredRows.map(r => r[10] !== undefined ? String(r[10]) : '');
+      const out = apexVals.join('\r\n');
+      triggerDownload(out, `${sellerBaseName}_bahan_apex_K2.csv`);
+    }
+
+    // --------------------------------------------------------
+    // GENERAL UTILITIES
+    // --------------------------------------------------------
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsText(file, 'latin1');
+      });
+    }
+
+    function setupDragDrop(el, callback) {
+      ['dragenter', 'dragover'].forEach(name => {
+        el.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          el.classList.add('border-indigo-500', 'bg-indigo-50/30');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        el.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          el.classList.remove('border-indigo-500', 'bg-indigo-50/30');
+        });
+      });
+      el.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) callback(files);
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Initialize on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSellerRulesList();
+    });
+  </script>
+</body>
+</html>
