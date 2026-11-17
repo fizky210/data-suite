@@ -83,97 +83,88 @@
   <!-- ======================================================== -->
   <div id="mobileBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 z-40 lg:hidden hidden transition-opacity"></div>
 
-  <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-72 bg-white border-r border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static shadow-sm">
+  <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-72 bg-white border-r border-slate-200/80 z-50 flex flex-col h-screen transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static shadow-sm select-none">
     
-    <!-- Top Branding -->
-    <div>
-      <div class="p-5 flex items-center justify-between border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-            <i class="fa-solid fa-cube text-lg"></i>
-          </div>
-          <div>
-            <h1 class="font-extrabold text-base tracking-tight text-slate-900 leading-tight">DataSuite Ops</h1>
-            <p class="text-[11px] text-slate-400 font-medium">Logistik & Data Tools</p>
-          </div>
+    <!-- Top Branding (Fixed Top) -->
+    <div class="px-4 py-3 flex-shrink-0 flex items-center justify-between border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+          <i class="fa-solid fa-cube text-sm"></i>
         </div>
-
-        <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+        <div>
+          <h1 class="font-extrabold text-sm tracking-tight text-slate-900 leading-tight">DataSuite Ops</h1>
+          <p class="text-[10px] text-slate-400 font-medium">Logistik & Data Tools</p>
+        </div>
       </div>
 
-      <!-- Navigation Section -->
-      <div class="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-270px)]">
+      <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Section (Scrollable if height is tiny) -->
+    <div class="flex-1 overflow-y-auto p-3 space-y-1">
+      <span class="px-2.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Fitur Pengolahan</span>
+      <div class="mt-1 space-y-1">
         
-        <div>
-          <span class="px-3 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Fitur Pengolahan</span>
-          <div class="mt-2 space-y-1">
-            
-            <button onclick="switchTab('gabung-csv')" id="tab-gabung-csv" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all sidebar-active">
-              <i class="fa-solid fa-layer-group text-sm w-5 text-indigo-600"></i>
-              <span class="truncate">1. Penggabung CSV</span>
-            </button>
+        <button onclick="switchTab('gabung-csv')" id="tab-gabung-csv" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all sidebar-active">
+          <i class="fa-solid fa-layer-group text-xs w-4 text-indigo-600"></i>
+          <span class="truncate">1. Penggabung CSV</span>
+        </button>
 
-            <button onclick="switchTab('gabung-apex')" id="tab-gabung-apex" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-              <i class="fa-solid fa-bolt-lightning text-sm w-5 text-purple-600"></i>
-              <span class="truncate">2. Penggabung APEX</span>
-            </button>
+        <button onclick="switchTab('gabung-apex')" id="tab-gabung-apex" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
+          <i class="fa-solid fa-bolt-lightning text-xs w-4 text-purple-600"></i>
+          <span class="truncate">2. Penggabung APEX</span>
+        </button>
 
-            <button onclick="switchTab('pemisah-csv')" id="tab-pemisah-csv" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-              <i class="fa-solid fa-scissors text-sm w-5 text-emerald-600"></i>
-              <span class="truncate">3. Pemisah CSV (Split)</span>
-            </button>
+        <button onclick="switchTab('pemisah-csv')" id="tab-pemisah-csv" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
+          <i class="fa-solid fa-scissors text-xs w-4 text-emerald-600"></i>
+          <span class="truncate">3. Pemisah CSV (Split)</span>
+        </button>
 
-            <button onclick="switchTab('pdf-sm')" id="tab-pdf-sm" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-              <i class="fa-solid fa-file-invoice text-sm w-5 text-blue-600"></i>
-              <span class="truncate">4. PDF SM ke Excel</span>
-            </button>
+        <button onclick="switchTab('pdf-sm')" id="tab-pdf-sm" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
+          <i class="fa-solid fa-file-invoice text-xs w-4 text-blue-600"></i>
+          <span class="truncate">4. PDF SM ke Excel</span>
+        </button>
 
-            <button onclick="switchTab('filter-seller')" id="tab-filter-seller" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
-              <i class="fa-solid fa-filter text-sm w-5 text-violet-600"></i>
-              <span class="truncate">5. Auto Filter Seller</span>
-            </button>
-
-          </div>
-        </div>
-
-        <!-- Dukungan & Kontak Menu -->
-        <div>
-          <span class="px-3 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Dukungan & Kontak</span>
-          <div class="mt-2 space-y-2">
-            
-            <button onclick="openCoffeeModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-md shadow-amber-500/25 transition-all group">
-              <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-mug-hot text-base group-hover:scale-110 transition-transform"></i>
-                <span>Traktir Kopi (QRIS)</span>
-              </div>
-              <span class="bg-white/20 px-1.5 py-0.5 rounded text-[10px]">QRIS</span>
-            </button>
-
-            <button onclick="openProfileModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold transition-all">
-              <div class="flex items-center gap-2.5">
-                <div class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
-                  FF
-                </div>
-                <span>Profil Admin</span>
-              </div>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-            </button>
-
-          </div>
-        </div>
+        <button onclick="switchTab('filter-seller')" id="tab-filter-seller" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
+          <i class="fa-solid fa-filter text-xs w-4 text-violet-600"></i>
+          <span class="truncate">5. Auto Filter Seller</span>
+        </button>
 
       </div>
     </div>
 
-    <!-- Bottom Sidebar Info -->
-    <div class="p-4 border-t border-slate-100 bg-slate-50/60">
-      <div class="flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        <div class="text-[11px]">
-          <p class="font-bold text-slate-700">100% Client-Side Safe</p>
-          <p class="text-slate-400">Data tidak keluar dari browser</p>
+    <!-- Pinned Bottom Section: Profil Admin & Traktir Kopi (ALWAYS VISIBLE WITHOUT SCROLL) -->
+    <div class="flex-shrink-0 border-t border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
+      <span class="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Dukungan & Kontak</span>
+      
+      <div class="space-y-1.5">
+        <button onclick="openCoffeeModal()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold shadow-sm shadow-amber-500/25 transition-all group">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-mug-hot text-xs group-hover:scale-110 transition-transform"></i>
+            <span>Traktir Kopi (QRIS)</span>
+          </div>
+          <span class="bg-white/20 px-1.5 py-0.5 rounded text-[9px]">QRIS</span>
+        </button>
+
+        <button onclick="openProfileModal()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200/70 text-slate-700 text-xs font-semibold shadow-xs transition-all">
+          <div class="flex items-center gap-2">
+            <div class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-bold">
+              FF
+            </div>
+            <span>Profil Admin</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
+        </button>
+      </div>
+
+      <!-- Safe Badge -->
+      <div class="pt-1 flex items-center gap-2 border-t border-slate-200/40">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div class="text-[10px]">
+          <p class="font-bold text-slate-700 leading-tight">100% Client-Side Safe</p>
+          <p class="text-slate-400 text-[9px] leading-tight">Data tidak keluar dari browser</p>
         </div>
       </div>
     </div>
@@ -535,44 +526,122 @@
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-              <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
-                <h4 class="font-bold text-slate-800 text-sm">1. Analisa Origin</h4>
-                <span class="text-[11px] text-slate-400">Karawang / Cikampek / Rengasdengklok</span>
+            <!-- KARTU 1: ANALISA ORIGIN -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100 mb-3">
+                  <div>
+                    <h4 class="font-bold text-slate-800 text-sm">1. Analisa Origin</h4>
+                    <p class="text-[11px] text-slate-400">Karawang / Cikampek / Rengasdengklok</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-arrow-down-up-across-line text-indigo-500 mr-1"></i>Urutkan:</span>
+                    <select id="pdf-origin-sort" onchange="applyPdfOriginFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                      <option value="bag-desc">🔥 Terbesar (Jumlah Bag)</option>
+                      <option value="bag-asc">❄️ Terkecil (Jumlah Bag)</option>
+                      <option value="weight-desc">⚖️ Terberat (Berat Kg)</option>
+                      <option value="weight-asc">🪶 Teringan (Berat Kg)</option>
+                      <option value="code-asc">🔤 Kode Origin (A-Z)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="overflow-x-auto max-h-60">
+                  <table id="pdf-origin-table" class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold select-none">
+                      <tr>
+                        <th onclick="toggleOriginSort('code')" class="p-2 cursor-pointer hover:text-indigo-600 transition-colors">
+                          Kode <i id="sort-icon-orig-code" class="fa-solid fa-sort text-[10px] ml-1 text-slate-400"></i>
+                        </th>
+                        <th class="p-2">Cabang</th>
+                        <th onclick="toggleOriginSort('bag')" class="p-2 cursor-pointer hover:text-indigo-600 transition-colors">
+                          Jumlah Bag <i id="sort-icon-orig-bag" class="fa-solid fa-sort-down text-[10px] ml-1 text-indigo-600"></i>
+                        </th>
+                        <th onclick="toggleOriginSort('weight')" class="p-2 cursor-pointer hover:text-indigo-600 transition-colors">
+                          Berat (Kg) <i id="sort-icon-orig-weight" class="fa-solid fa-sort text-[10px] ml-1 text-slate-400"></i>
+                        </th>
+                        <th class="p-2">Proporsi</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
               </div>
-              <div class="overflow-x-auto max-h-60">
-                <table id="pdf-origin-table" class="w-full text-left text-xs">
-                  <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold">
-                    <tr>
-                      <th class="p-2">Kode</th>
-                      <th class="p-2">Cabang</th>
-                      <th class="p-2">Jumlah Bag</th>
-                      <th class="p-2">Berat (Kg)</th>
-                      <th class="p-2">Proporsi</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100"></tbody>
-                </table>
+              <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Klik judul kolom untuk membalik urutan data (terkecil &harr; terbesar)</span>
+                <button onclick="copyOriginTableData()" class="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                  <i class="fa-regular fa-copy text-xs"></i> Salin Data
+                </button>
               </div>
             </div>
 
-            <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-              <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
-                <h4 class="font-bold text-slate-800 text-sm">2. Analisa Destinasi (3 Karakter)</h4>
-                <span class="text-[11px] text-slate-400">CGK, BDO, SMI, dll.</span>
+            <!-- KARTU 2: ANALISA DESTINASI -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100 mb-3">
+                  <div>
+                    <h4 class="font-bold text-slate-800 text-sm">2. Analisa Destinasi (3 Karakter)</h4>
+                    <p class="text-[11px] text-slate-400">Filter & ambil data destinasi terbesar / terkecil</p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <!-- Filter Urutkan -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-arrow-down-up-across-line text-blue-500 mr-1"></i>Urutkan:</span>
+                      <select id="pdf-dest-sort" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <option value="bag-desc">🔥 Terbesar (Jumlah Bag)</option>
+                        <option value="bag-asc">❄️ Terkecil (Jumlah Bag)</option>
+                        <option value="weight-desc">⚖️ Terberat (Berat Kg)</option>
+                        <option value="weight-asc">🪶 Teringan (Berat Kg)</option>
+                        <option value="code-asc">🔤 Kode Destinasi (A-Z)</option>
+                      </select>
+                    </div>
+                    <!-- Filter Limit / Ambil Data -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] font-semibold text-slate-500">Ambil:</span>
+                      <select id="pdf-dest-limit" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <option value="all">Semua</option>
+                        <option value="3">Top 3</option>
+                        <option value="5">Top 5</option>
+                        <option value="10">Top 10</option>
+                        <option value="20">Top 20</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quick Search & Counter Badge -->
+                <div class="mb-2.5 flex items-center gap-2">
+                  <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="pdf-dest-search" oninput="applyPdfDestFilter()" placeholder="Cari kode destinasi (misal: CGK, SMI, BDO)..." class="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  </div>
+                  <span id="pdf-dest-count-badge" class="text-[10px] font-bold px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-100 whitespace-nowrap">0 Destinasi</span>
+                </div>
+
+                <div class="overflow-x-auto max-h-60">
+                  <table id="pdf-dest-table" class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold select-none">
+                      <tr>
+                        <th onclick="toggleDestSort('code')" class="p-2 cursor-pointer hover:text-blue-600 transition-colors">
+                          Kode <i id="sort-icon-dest-code" class="fa-solid fa-sort text-[10px] ml-1 text-slate-400"></i>
+                        </th>
+                        <th onclick="toggleDestSort('bag')" class="p-2 cursor-pointer hover:text-blue-600 transition-colors">
+                          Jumlah Bag <i id="sort-icon-dest-bag" class="fa-solid fa-sort-down text-[10px] ml-1 text-blue-600"></i>
+                        </th>
+                        <th class="p-2">Persentase</th>
+                        <th onclick="toggleDestSort('weight')" class="p-2 cursor-pointer hover:text-blue-600 transition-colors">
+                          Total Berat <i id="sort-icon-dest-weight" class="fa-solid fa-sort text-[10px] ml-1 text-slate-400"></i>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
               </div>
-              <div class="overflow-x-auto max-h-60">
-                <table id="pdf-dest-table" class="w-full text-left text-xs">
-                  <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold">
-                    <tr>
-                      <th class="p-2">Kode</th>
-                      <th class="p-2">Jumlah Bag</th>
-                      <th class="p-2">Persentase</th>
-                      <th class="p-2">Total Berat</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100"></tbody>
-                </table>
+              <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Klik judul kolom untuk membalik urutan data (terkecil &harr; terbesar)</span>
+                <button onclick="copyDestTableData()" class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                  <i class="fa-regular fa-copy text-xs"></i> Salin Data
+                </button>
               </div>
             </div>
           </div>
@@ -1732,68 +1801,47 @@
       return rows;
     }
 
+    let currentPdfOriginMap = {};
+    let currentPdfDestMap = {};
+    let currentPdfTotalBag = 0;
+    let currentPdfTotalWeight = 0;
+
     function renderPdfAnalytics(data) {
-      const totalBag = data.length;
-      let totalWeight = 0;
+      currentPdfTotalBag = data.length;
+      currentPdfTotalWeight = 0;
       const smuSet = new Set();
-      const originMap = {};
-      const dest3Map = {};
+      currentPdfOriginMap = {};
+      currentPdfDestMap = {};
       const dateMap = {};
 
       data.forEach(row => {
-        totalWeight += Number(row.weight) || 0;
+        const w = Number(row.weight) || 0;
+        currentPdfTotalWeight += w;
         if (row.noSmu && row.noSmu !== '-') smuSet.add(row.noSmu);
 
         const orig = row.origin || 'LAINNYA';
-        if (!originMap[orig]) {
-          originMap[orig] = { name: row.originBranch || orig, count: 0, weight: 0 };
+        if (!currentPdfOriginMap[orig]) {
+          currentPdfOriginMap[orig] = { name: row.originBranch || orig, count: 0, weight: 0 };
         }
-        originMap[orig].count += 1;
-        originMap[orig].weight += Number(row.weight) || 0;
+        currentPdfOriginMap[orig].count += 1;
+        currentPdfOriginMap[orig].weight += w;
 
         let dCode = row.destCode || 'OTH';
-        if (!dest3Map[dCode]) dest3Map[dCode] = { count: 0, weight: 0 };
-        dest3Map[dCode].count += 1;
-        dest3Map[dCode].weight += Number(row.weight) || 0;
+        if (!currentPdfDestMap[dCode]) currentPdfDestMap[dCode] = { count: 0, weight: 0 };
+        currentPdfDestMap[dCode].count += 1;
+        currentPdfDestMap[dCode].weight += w;
 
         const sDate = row.scheduleDate || 'No Date';
         dateMap[sDate] = (dateMap[sDate] || 0) + 1;
       });
 
       document.getElementById('pdf-stat-smu').textContent = smuSet.size || 1;
-      document.getElementById('pdf-stat-bag').textContent = totalBag.toLocaleString('id-ID');
-      document.getElementById('pdf-stat-weight').textContent = totalWeight.toLocaleString('id-ID') + ' Kg';
-      document.getElementById('pdf-stat-dest').textContent = Object.keys(dest3Map).length;
+      document.getElementById('pdf-stat-bag').textContent = currentPdfTotalBag.toLocaleString('id-ID');
+      document.getElementById('pdf-stat-weight').textContent = currentPdfTotalWeight.toLocaleString('id-ID') + ' Kg';
+      document.getElementById('pdf-stat-dest').textContent = Object.keys(currentPdfDestMap).length;
 
-      const originTbody = document.querySelector('#pdf-origin-table tbody');
-      originTbody.innerHTML = Object.keys(originMap).map(code => {
-        const item = originMap[code];
-        const pct = ((item.count / totalBag) * 100).toFixed(1);
-        return `
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="p-2 font-mono font-bold text-indigo-700">${code}</td>
-            <td class="p-2 font-medium">${item.name}</td>
-            <td class="p-2 font-semibold">${item.count} Bag</td>
-            <td class="p-2">${item.weight} Kg</td>
-            <td class="p-2 font-bold text-slate-700">${pct}%</td>
-          </tr>
-        `;
-      }).join('');
-
-      const destTbody = document.querySelector('#pdf-dest-table tbody');
-      const sortedDest = Object.keys(dest3Map).sort((a,b) => dest3Map[b].count - dest3Map[a].count);
-      destTbody.innerHTML = sortedDest.map(code => {
-        const item = dest3Map[code];
-        const pct = ((item.count / totalBag) * 100).toFixed(1);
-        return `
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="p-2 font-mono font-bold text-blue-700">${code}</td>
-            <td class="p-2 font-semibold">${item.count} BAG</td>
-            <td class="p-2 font-bold text-slate-700">${pct}%</td>
-            <td class="p-2">${item.weight} Kg</td>
-          </tr>
-        `;
-      }).join('');
+      applyPdfOriginFilter();
+      applyPdfDestFilter();
 
       const previewTbody = document.querySelector('#pdf-preview-table tbody');
       document.getElementById('pdf-row-preview-count').textContent = `Menampilkan ${Math.min(data.length, 20)} dari total ${data.length} baris`;
@@ -1819,7 +1867,211 @@
         </tr>
       `).join('');
 
-      renderPdfCharts(dateMap, dest3Map, totalBag);
+      renderPdfCharts(dateMap, currentPdfDestMap, currentPdfTotalBag);
+    }
+
+    // 1. ANALISA ORIGIN FILTER & SORTING
+    function applyPdfOriginFilter() {
+      const sortVal = document.getElementById('pdf-origin-sort') ? document.getElementById('pdf-origin-sort').value : 'bag-desc';
+      const codes = Object.keys(currentPdfOriginMap);
+
+      codes.sort((a, b) => {
+        const itemA = currentPdfOriginMap[a];
+        const itemB = currentPdfOriginMap[b];
+        if (sortVal === 'bag-desc') return itemB.count - itemA.count;
+        if (sortVal === 'bag-asc') return itemA.count - itemB.count;
+        if (sortVal === 'weight-desc') return itemB.weight - itemA.weight;
+        if (sortVal === 'weight-asc') return itemA.weight - itemB.weight;
+        if (sortVal === 'code-asc') return a.localeCompare(b);
+        if (sortVal === 'code-desc') return b.localeCompare(a);
+        return 0;
+      });
+
+      updateSortIcon('sort-icon-orig-code', sortVal.startsWith('code'), sortVal === 'code-asc');
+      updateSortIcon('sort-icon-orig-bag', sortVal.startsWith('bag'), sortVal === 'bag-asc');
+      updateSortIcon('sort-icon-orig-weight', sortVal.startsWith('weight'), sortVal === 'weight-asc');
+
+      const tbody = document.querySelector('#pdf-origin-table tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = codes.map(code => {
+        const item = currentPdfOriginMap[code];
+        const pct = currentPdfTotalBag > 0 ? ((item.count / currentPdfTotalBag) * 100).toFixed(1) : 0;
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-2 font-mono font-bold text-indigo-700">${code}</td>
+            <td class="p-2 font-medium">${item.name}</td>
+            <td class="p-2 font-semibold">${item.count.toLocaleString('id-ID')} Bag</td>
+            <td class="p-2">${item.weight.toLocaleString('id-ID')} Kg</td>
+            <td class="p-2 font-bold text-slate-700">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleOriginSort(col) {
+      const select = document.getElementById('pdf-origin-sort');
+      if (!select) return;
+      const current = select.value;
+
+      if (col === 'bag') {
+        select.value = (current === 'bag-desc') ? 'bag-asc' : 'bag-desc';
+      } else if (col === 'weight') {
+        select.value = (current === 'weight-desc') ? 'weight-asc' : 'weight-desc';
+      } else if (col === 'code') {
+        select.value = (current === 'code-asc') ? 'code-desc' : 'code-asc';
+      }
+      applyPdfOriginFilter();
+    }
+
+    function copyOriginTableData() {
+      const codes = Object.keys(currentPdfOriginMap);
+      if (codes.length === 0) return alert('Belum ada data origin untuk disalin.');
+
+      const sortVal = document.getElementById('pdf-origin-sort') ? document.getElementById('pdf-origin-sort').value : 'bag-desc';
+      codes.sort((a, b) => {
+        const itemA = currentPdfOriginMap[a];
+        const itemB = currentPdfOriginMap[b];
+        if (sortVal === 'bag-desc') return itemB.count - itemA.count;
+        if (sortVal === 'bag-asc') return itemA.count - itemB.count;
+        if (sortVal === 'weight-desc') return itemB.weight - itemA.weight;
+        if (sortVal === 'weight-asc') return itemA.weight - itemB.weight;
+        return a.localeCompare(b);
+      });
+
+      let text = "Kode\tCabang\tJumlah Bag\tBerat (Kg)\tProporsi (%)\n";
+      codes.forEach(code => {
+        const item = currentPdfOriginMap[code];
+        const pct = currentPdfTotalBag > 0 ? ((item.count / currentPdfTotalBag) * 100).toFixed(1) : 0;
+        text += `${code}\t${item.name}\t${item.count}\t${item.weight}\t${pct}%\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Data Ringkasan Origin berhasil disalin ke clipboard!');
+      }).catch(() => {
+        prompt('Salin data origin berikut:', text);
+      });
+    }
+
+    // 2. ANALISA DESTINASI FILTER & SORTING
+    function applyPdfDestFilter() {
+      const sortVal = document.getElementById('pdf-dest-sort') ? document.getElementById('pdf-dest-sort').value : 'bag-desc';
+      const limitVal = document.getElementById('pdf-dest-limit') ? document.getElementById('pdf-dest-limit').value : 'all';
+      const searchVal = document.getElementById('pdf-dest-search') ? document.getElementById('pdf-dest-search').value.trim().toUpperCase() : '';
+
+      let codes = Object.keys(currentPdfDestMap);
+      const totalDestCount = codes.length;
+
+      // Filter Pencarian
+      if (searchVal) {
+        codes = codes.filter(c => c.toUpperCase().includes(searchVal));
+      }
+
+      // Pengurutan (Terkecil vs Terbesar)
+      codes.sort((a, b) => {
+        const itemA = currentPdfDestMap[a];
+        const itemB = currentPdfDestMap[b];
+        if (sortVal === 'bag-desc') return itemB.count - itemA.count;
+        if (sortVal === 'bag-asc') return itemA.count - itemB.count;
+        if (sortVal === 'weight-desc') return itemB.weight - itemA.weight;
+        if (sortVal === 'weight-asc') return itemA.weight - itemB.weight;
+        if (sortVal === 'code-asc') return a.localeCompare(b);
+        if (sortVal === 'code-desc') return b.localeCompare(a);
+        return 0;
+      });
+
+      // Limit / Ambil Top N data
+      let displayedCodes = codes;
+      if (limitVal !== 'all') {
+        const limit = parseInt(limitVal, 10);
+        if (!isNaN(limit) && limit > 0) {
+          displayedCodes = codes.slice(0, limit);
+        }
+      }
+
+      // Update badge jumlah
+      const badge = document.getElementById('pdf-dest-count-badge');
+      if (badge) {
+        if (displayedCodes.length === totalDestCount) {
+          badge.textContent = `${totalDestCount} Destinasi`;
+        } else {
+          badge.textContent = `${displayedCodes.length} dari ${totalDestCount} Destinasi`;
+        }
+      }
+
+      // Update icon indikator header
+      updateSortIcon('sort-icon-dest-code', sortVal.startsWith('code'), sortVal === 'code-asc');
+      updateSortIcon('sort-icon-dest-bag', sortVal.startsWith('bag'), sortVal === 'bag-asc');
+      updateSortIcon('sort-icon-dest-weight', sortVal.startsWith('weight'), sortVal === 'weight-asc');
+
+      const tbody = document.querySelector('#pdf-dest-table tbody');
+      if (!tbody) return;
+
+      if (displayedCodes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Tidak ada destinasi yang cocok.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = displayedCodes.map(code => {
+        const item = currentPdfDestMap[code];
+        const pct = currentPdfTotalBag > 0 ? ((item.count / currentPdfTotalBag) * 100).toFixed(1) : 0;
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-2 font-mono font-bold text-blue-700">${code}</td>
+            <td class="p-2 font-semibold">${item.count.toLocaleString('id-ID')} BAG</td>
+            <td class="p-2 font-bold text-slate-700">${pct}%</td>
+            <td class="p-2">${item.weight.toLocaleString('id-ID')} Kg</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleDestSort(col) {
+      const select = document.getElementById('pdf-dest-sort');
+      if (!select) return;
+      const current = select.value;
+
+      if (col === 'bag') {
+        select.value = (current === 'bag-desc') ? 'bag-asc' : 'bag-desc';
+      } else if (col === 'weight') {
+        select.value = (current === 'weight-desc') ? 'weight-asc' : 'weight-desc';
+      } else if (col === 'code') {
+        select.value = (current === 'code-asc') ? 'code-desc' : 'code-asc';
+      }
+      applyPdfDestFilter();
+    }
+
+    function copyDestTableData() {
+      const tbody = document.querySelector('#pdf-dest-table tbody');
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll('tr');
+      if (rows.length === 0) return alert('Belum ada data destinasi untuk disalin.');
+
+      let text = "Kode Destinasi\tJumlah Bag\tPersentase (%)\tTotal Berat (Kg)\n";
+      rows.forEach(tr => {
+        const cols = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+        if (cols.length === 4) {
+          text += cols.join('\t') + '\n';
+        }
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Data Tabel Destinasi hasil filter berhasil disalin ke clipboard!');
+      }).catch(() => {
+        prompt('Salin data destinasi berikut:', text);
+      });
+    }
+
+    function updateSortIcon(elemId, isActive, isAsc) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      if (!isActive) {
+        el.className = 'fa-solid fa-sort text-[10px] ml-1 text-slate-300';
+      } else if (isAsc) {
+        el.className = 'fa-solid fa-sort-up text-[10px] ml-1 text-indigo-600 font-bold';
+      } else {
+        el.className = 'fa-solid fa-sort-down text-[10px] ml-1 text-indigo-600 font-bold';
+      }
     }
 
     function renderPdfCharts(dateMap, dest3Map, totalBag) {
@@ -1906,8 +2158,20 @@
 
     function resetPdf() {
       pdfMasterRows = [];
+      currentPdfOriginMap = {};
+      currentPdfDestMap = {};
+      currentPdfTotalBag = 0;
+      currentPdfTotalWeight = 0;
       pdfInput.value = '';
       if (pdfExcelInput) pdfExcelInput.value = '';
+      const destSearch = document.getElementById('pdf-dest-search');
+      if (destSearch) destSearch.value = '';
+      const destLimit = document.getElementById('pdf-dest-limit');
+      if (destLimit) destLimit.value = 'all';
+      const destSort = document.getElementById('pdf-dest-sort');
+      if (destSort) destSort.value = 'bag-desc';
+      const originSort = document.getElementById('pdf-origin-sort');
+      if (originSort) originSort.value = 'bag-desc';
       pdfResultsContainer.classList.add('hidden');
       pdfResetBtn.classList.add('hidden');
       pdfDownloadBtn.classList.add('hidden');
