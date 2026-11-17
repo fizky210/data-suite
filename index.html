@@ -494,13 +494,17 @@
             <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
             <span>Menunggu file PDF atau Excel...</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button id="pdf-reset-btn" onclick="resetPdf()" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all">
               Reset Data
             </button>
             <button id="pdf-download-btn" onclick="downloadPdfExcel()" class="hidden px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all">
               <i class="fa-solid fa-file-excel"></i>
-              <span>Unduh Excel (.xlsx)</span>
+              <span>Unduh Excel Gabungan (.xlsx)</span>
+            </button>
+            <button id="pdf-download-outbound-btn" onclick="downloadOutboundReport()" class="hidden px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-truck-fast"></i>
+              <span>Download Report Outbound (.xlsx)</span>
             </button>
           </div>
         </div>
@@ -693,6 +697,47 @@
               </table>
             </div>
           </div>
+
+          <!-- KARTU 3: PRATINJAU REPORT OUTBOUND -->
+          <div class="bg-white p-5 rounded-3xl border border-blue-200/80 shadow-sm">
+            <div class="flex flex-wrap justify-between items-center gap-3 pb-3 border-b border-slate-100 mb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-slate-800 text-sm">3. Pratinjau Report Outbound (Summary per SM)</h4>
+                  <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 text-[10px] font-bold">Khusus Outbound</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Ringkasan per Surat Muatan: Date, Total Bag, Dest, Weight, Armada, No SM, ETD, Driver, No Polisi.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="copyOutboundTableData()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+                  <i class="fa-regular fa-copy text-xs"></i>
+                  <span>Salin Tabel</span>
+                </button>
+                <button onclick="downloadOutboundReport()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-600/20 flex items-center gap-1.5 transition-all">
+                  <i class="fa-solid fa-download text-xs"></i>
+                  <span>Download Report Outbound (.xlsx)</span>
+                </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto max-h-96">
+              <table id="pdf-outbound-table" class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-blue-50 text-blue-900 sticky top-0 font-bold border-b border-blue-200">
+                  <tr>
+                    <th class="p-2.5">Date</th>
+                    <th class="p-2.5">Total Bag</th>
+                    <th class="p-2.5">Dest</th>
+                    <th class="p-2.5">Weight (Kg)</th>
+                    <th class="p-2.5">Armada</th>
+                    <th class="p-2.5">No SM</th>
+                    <th class="p-2.5">ETD</th>
+                    <th class="p-2.5">Driver</th>
+                    <th class="p-2.5">No Polisi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-mono text-[11px]"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -842,7 +887,7 @@
           </div>
 
           <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 inline-block my-2 max-w-[200px] sm:max-w-[220px]">
-            <img id="qrisImageElement" src="qris.jpeg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
+            <img id="qrisImageElement" src="qris.jpg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
           </div>
 
           <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
@@ -1396,6 +1441,7 @@
     const pdfStatus = document.getElementById('pdf-status');
     const pdfResetBtn = document.getElementById('pdf-reset-btn');
     const pdfDownloadBtn = document.getElementById('pdf-download-btn');
+    const pdfDownloadOutboundBtn = document.getElementById('pdf-download-outbound-btn');
     const pdfResultsContainer = document.getElementById('pdf-results-container');
 
     // Setup Kotak Kiri (PDF)
@@ -1459,6 +1505,7 @@
         pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Berhasil memuat ${pdfMasterRows.length} baris dari "${file.name}".</span>`;
         pdfResetBtn.classList.remove('hidden');
         pdfDownloadBtn.classList.remove('hidden');
+        if (pdfDownloadOutboundBtn) pdfDownloadOutboundBtn.classList.remove('hidden');
         pdfResultsContainer.classList.remove('hidden');
 
         renderPdfAnalytics(pdfMasterRows);
@@ -1494,6 +1541,7 @@
       pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Berhasil memproses ${pdfFiles.length} file (${pdfMasterRows.length} total bag).</span>`;
       pdfResetBtn.classList.remove('hidden');
       pdfDownloadBtn.classList.remove('hidden');
+      if (pdfDownloadOutboundBtn) pdfDownloadOutboundBtn.classList.remove('hidden');
       pdfResultsContainer.classList.remove('hidden');
 
       renderPdfAnalytics(pdfMasterRows);
@@ -1868,6 +1916,7 @@
       `).join('');
 
       renderPdfCharts(dateMap, currentPdfDestMap, currentPdfTotalBag);
+      renderOutboundTable();
     }
 
     // 1. ANALISA ORIGIN FILTER & SORTING
@@ -2156,6 +2205,277 @@
       XLSX.writeFile(wb, `Surat_Muatan_Combined_${today}.xlsx`);
     }
 
+    // ========================================================
+    // FITUR KHUSUS: REPORT OUTBOUND
+    // ========================================================
+    const OUTBOUND_SCHEDULE_MAP = {
+      'KRWCGX00': { armada: 'ARMADA 1', label: 'Armada 01', note: 'VIA TRANSIT' },
+      'KRWCGK00': { armada: 'ARMADA 1', label: 'Armada 01', note: 'VIA MGH' },
+      'KRWCGX02': { armada: 'ARMADA 2', label: 'Armada 02', note: 'VIA TRANSIT' },
+      'KRWCGK02': { armada: 'ARMADA 2', label: 'Armada 02', note: 'VIA MGH' },
+      'KRWCGX04': { armada: 'ARMADA 3', label: 'Armada 03', note: 'VIA TRANSIT' },
+      'KRWCGK04': { armada: 'ARMADA 3', label: 'Armada 03', note: 'VIA MGH' },
+      'KRWCGX06': { armada: 'ARMADA 4', label: 'Armada 04', note: 'JOGLO VIA CKR' },
+      'KRWCGK06': { armada: 'ARMADA 4', label: 'Armada 04', note: 'VIA MGH' },
+      'KRWCGX08': { armada: 'ARMADA 5', label: 'Armada 05', note: 'VIA JTR' },
+      'KRWCGK08': { armada: 'ARMADA 5', label: 'Armada 05', note: 'VIA JTR' },
+      'KRWCGX10': { armada: 'ARMADA 6', label: 'Armada 06', note: 'VIA TRANSIT' },
+      'KRWCGK10': { armada: 'ARMADA 6', label: 'Armada 06', note: 'VIA MGH' },
+      'KRWCGX12': { armada: 'ARMADA 7', label: 'Armada 07', note: '-' },
+      'KRWCGK12': { armada: 'ARMADA 7', label: 'Armada 07', note: '-' },
+      'KRWCKR00': { armada: 'ARMADA 4', label: 'Direct Cikarang', note: 'DIRECT CKR' },
+      'KRWBDO00': { armada: 'BDO',      label: 'Direct Bandung', note: 'DIRECT BDO' },
+      'KRWBDO02': { armada: 'BDO',      label: 'Direct Bandung', note: 'DIRECT BDO' },
+      'KRWPWT00': { armada: 'PWT',      label: 'Direct Purwakarta', note: 'DIRECT PWT' },
+      'KRWCBN00': { armada: 'CBN',      label: 'Direct Cirebon', note: 'DIRECT CBN' },
+      'KRWTSM00': { armada: 'TSM',      label: 'Direct Tasik', note: 'TSM VIA BDO' },
+      'KRWBKI00': { armada: 'BKI',      label: 'Direct Bekasi', note: 'DIRECT BKI' },
+      'KRWBOO00': { armada: 'BOO',      label: 'Direct Bogor', note: 'DIRECT BOO' },
+      'KRWCKP00': { armada: 'CKP',      label: 'Direct Cikampek', note: 'DIRECT KCP' },
+      'KRWRDK00': { armada: 'RDK',      label: 'Direct Dengklok', note: 'DIRECT RDK' },
+      'KRWSRG00': { armada: 'SRG',      label: 'Direct Semarang', note: 'DIRECT SRG' },
+      'KRWDPK00': { armada: 'DPK',      label: 'Direct Depok', note: 'DIRECT DPK' },
+      'KRWSMI00': { armada: 'SMI',      label: 'Direct Sukabumi', note: 'DIRECT SMI' },
+      'KRWRDK1':  { armada: 'RDK',      label: 'Direct Dengklok', note: 'DIRECT RDK' },
+      'KRWKCP1':  { armada: 'CKP',      label: 'Direct Cikampek', note: 'DIRECT CKP' }
+    };
+
+    function getArmadaFromSchedule(schedNo, dest, noSm) {
+      if (!schedNo) schedNo = '';
+      const clean = schedNo.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+      if (OUTBOUND_SCHEDULE_MAP[clean]) {
+        return OUTBOUND_SCHEDULE_MAP[clean].armada;
+      }
+
+      // Handle variasi KRWCGX / KRWCGK
+      const mCg = clean.match(/^KRWCG[XK](\d+)/);
+      if (mCg) {
+        const num = parseInt(mCg[1], 10);
+        if (num <= 1) return 'ARMADA 1';
+        if (num <= 3) return 'ARMADA 2';
+        if (num <= 5) return 'ARMADA 3';
+        if (num <= 7) return 'ARMADA 4';
+        if (num <= 9) return 'ARMADA 5';
+        if (num <= 11) return 'ARMADA 6';
+        return 'ARMADA 7';
+      }
+
+      // Handle Direct destination code: KRW + 3-char (misal: KRWBDO -> BDO)
+      const mDirect = clean.match(/^KRW([A-Z]{3})/);
+      if (mDirect) {
+        const code = mDirect[1];
+        if (code === 'CGK' || code === 'CGX') return 'ARMADA 1';
+        if (code === 'KCP') return 'CKP';
+        return code;
+      }
+
+      // Fallback jika Schedule No kosong / tidak dikenali, deteksi dari No SM
+      if (noSm) {
+        const cleanSm = noSm.trim().toUpperCase();
+        if (cleanSm.startsWith('KRWMGH')) return 'ARMADA 1';
+        if (cleanSm.startsWith('KRWCUX') || cleanSm.startsWith('KRWCKR')) return 'ARMADA 4';
+        const mSm = cleanSm.match(/^KRW([A-Z]{3})/);
+        if (mSm) {
+          const code = mSm[1];
+          if (code === 'CGX' || code === 'CGK') return 'ARMADA 1';
+          return code;
+        }
+      }
+
+      // Fallback dest jika valid 3 karakter
+      if (dest && dest !== 'CGK' && dest !== 'CGX' && dest.length === 3) {
+        return dest;
+      }
+      return clean || '-';
+    }
+
+    function formatOutboundDate(str) {
+      if (!str || str === '-') return '-';
+      const m1 = str.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+      if (m1) {
+        const d = m1[1];
+        const mon = m1[2].charAt(0).toUpperCase() + m1[2].slice(1).toLowerCase();
+        const yr = m1[3].length === 4 ? m1[3].slice(-2) : m1[3];
+        return `${d}-${mon}-${yr}`;
+      }
+      const m2 = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (m2) {
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const mon = monthNames[parseInt(m2[1], 10) - 1] || 'Nov';
+        const d = m2[2];
+        const yr = m2[3].length === 4 ? m2[3].slice(-2) : m2[3];
+        return `${d}-${mon}-${yr}`;
+      }
+      const m3 = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m3) {
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const mon = monthNames[parseInt(m3[2], 10) - 1] || 'Nov';
+        const d = m3[3];
+        const yr = m3[1].slice(-2);
+        return `${d}-${mon}-${yr}`;
+      }
+      return str.trim();
+    }
+
+    function formatOutboundEtd(str) {
+      if (!str || str === '-') return '-';
+      const m = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+      if (m) {
+        let h = parseInt(m[1], 10);
+        const min = m[2];
+        const ampm = m[3] ? m[3].toUpperCase() : '';
+        if (ampm === 'PM' && h < 12) h += 12;
+        if (ampm === 'AM' && h === 12) h = 0;
+        return `${h}:${min}`;
+      }
+      return str.trim();
+    }
+
+    function getOutboundReportData() {
+      if (!pdfMasterRows || pdfMasterRows.length === 0) return [];
+
+      const smuMap = new Map();
+
+      pdfMasterRows.forEach(row => {
+        const smuKey = (row.noSmu && row.noSmu !== '-') ? row.noSmu : `DOC_${row.scheduleNo || 'UNKNOWN'}_${row.destinationHeader || ''}`;
+
+        if (!smuMap.has(smuKey)) {
+          smuMap.set(smuKey, {
+            date: row.scheduleDate || '-',
+            destHeader: row.destinationHeader || '',
+            scheduleNo: row.scheduleNo || '',
+            noSmu: (row.noSmu && row.noSmu !== '-') ? row.noSmu : '',
+            etd: row.etd || '',
+            noPol: row.noPol || '',
+            totalBag: 0,
+            totalWeight: 0,
+            sampleRow: row
+          });
+        }
+
+        const item = smuMap.get(smuKey);
+        item.totalBag += 1;
+        item.totalWeight += (Number(row.weight) || 0);
+        if (!item.noPol && row.noPol) item.noPol = row.noPol;
+        if ((!item.date || item.date === '-') && row.scheduleDate) item.date = row.scheduleDate;
+        if ((!item.destHeader || item.destHeader === '-') && row.destinationHeader) item.destHeader = row.destinationHeader;
+        if ((!item.scheduleNo || item.scheduleNo === '-') && row.scheduleNo) item.scheduleNo = row.scheduleNo;
+        if ((!item.etd || item.etd === '-') && row.etd) item.etd = row.etd;
+      });
+
+      const reportRows = [];
+
+      smuMap.forEach((val) => {
+        const date = formatOutboundDate(val.date);
+        const totalBag = val.totalBag;
+
+        let dest = '';
+        if (val.destHeader && val.destHeader !== '-') {
+          const cleanHeader = val.destHeader.trim();
+          if (cleanHeader.length >= 3) dest = cleanHeader.substring(0, 3).toUpperCase();
+        }
+        if (!dest && val.noSmu) {
+          if (val.noSmu.startsWith('KRWMGH')) dest = 'CGK';
+          else if (val.noSmu.startsWith('KRWCUX')) dest = 'CGX';
+          else if (/^KRW([A-Z]{3})/i.test(val.noSmu)) {
+            dest = val.noSmu.match(/^KRW([A-Z]{3})/i)[1].toUpperCase();
+          }
+        }
+        if (!dest && val.sampleRow && val.sampleRow.destCode) {
+          dest = val.sampleRow.destCode;
+        }
+        if (!dest) dest = 'CGK';
+
+        const weight = Math.round(val.totalWeight * 10) / 10;
+        const armada = getArmadaFromSchedule(val.scheduleNo, dest, val.noSmu);
+        const noSm = val.noSmu || '-';
+        const etd = formatOutboundEtd(val.etd);
+        const driver = ''; // Dikosongkan sesuai permintaan
+        const noPolisi = val.noPol || (val.sampleRow ? val.sampleRow.noPol : '') || '';
+
+        reportRows.push({
+          "Date": date,
+          "Total Bag": totalBag,
+          "Dest": dest,
+          "Weight (Kg)": weight,
+          "Armada": armada,
+          "No SM": noSm,
+          "ETD": etd,
+          "Driver": driver,
+          "No Polisi": noPolisi
+        });
+      });
+
+      return reportRows;
+    }
+
+    function renderOutboundTable() {
+      const tbody = document.querySelector('#pdf-outbound-table tbody');
+      if (!tbody) return;
+
+      const reportRows = getOutboundReportData();
+      if (reportRows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">Belum ada data Report Outbound.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = reportRows.map((r) => `
+        <tr class="hover:bg-blue-50/40 transition-colors">
+          <td class="p-2.5 font-medium text-slate-700">${r["Date"]}</td>
+          <td class="p-2.5 font-bold text-indigo-700">${r["Total Bag"]}</td>
+          <td class="p-2.5 font-bold text-blue-700">${r["Dest"]}</td>
+          <td class="p-2.5 font-semibold text-emerald-700">${r["Weight (Kg)"]}</td>
+          <td class="p-2.5 font-bold text-purple-700">${r["Armada"]}</td>
+          <td class="p-2.5 font-mono font-semibold text-slate-800">${r["No SM"]}</td>
+          <td class="p-2.5 font-mono font-medium text-slate-600">${r["ETD"]}</td>
+          <td class="p-2.5 text-slate-400 italic">${r["Driver"] || '-'}</td>
+          <td class="p-2.5 font-mono font-bold text-slate-700">${r["No Polisi"]}</td>
+        </tr>
+      `).join('');
+    }
+
+    function copyOutboundTableData() {
+      const reportRows = getOutboundReportData();
+      if (reportRows.length === 0) return alert('Belum ada data Report Outbound untuk disalin.');
+
+      let text = "Date\tTotal Bag\tDest\tWeight (Kg)\tArmada\tNo SM\tETD\tDriver\tNo Polisi\n";
+      reportRows.forEach(r => {
+        text += `${r["Date"]}\t${r["Total Bag"]}\t${r["Dest"]}\t${r["Weight (Kg)"]}\t${r["Armada"]}\t${r["No SM"]}\t${r["ETD"]}\t${r["Driver"]}\t${r["No Polisi"]}\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Tabel Report Outbound berhasil disalin ke clipboard! Siap di-paste ke Excel.');
+      }).catch(() => {
+        prompt('Salin data Report Outbound berikut:', text);
+      });
+    }
+
+    function downloadOutboundReport() {
+      const reportRows = getOutboundReportData();
+      if (reportRows.length === 0) return alert('Tidak ada data untuk membuat Report Outbound.');
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(reportRows);
+
+      ws['!cols'] = [
+        { wch: 14 }, // Date
+        { wch: 12 }, // Total Bag
+        { wch: 8 },  // Dest
+        { wch: 14 }, // Weight (Kg)
+        { wch: 16 }, // Armada
+        { wch: 22 }, // No SM
+        { wch: 10 }, // ETD
+        { wch: 14 }, // Driver
+        { wch: 16 }  // No Polisi
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "Report Outbound");
+
+      const today = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `Report_Outbound_${today}.xlsx`);
+    }
+
     function resetPdf() {
       pdfMasterRows = [];
       currentPdfOriginMap = {};
@@ -2175,6 +2495,7 @@
       pdfResultsContainer.classList.add('hidden');
       pdfResetBtn.classList.add('hidden');
       pdfDownloadBtn.classList.add('hidden');
+      if (pdfDownloadOutboundBtn) pdfDownloadOutboundBtn.classList.add('hidden');
       pdfStatus.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span>Menunggu file PDF atau Excel...</span>`;
       if (pdfChartDateInst) pdfChartDateInst.destroy();
       if (pdfChartDestInst) pdfChartDestInst.destroy();
