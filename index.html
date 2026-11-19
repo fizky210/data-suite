@@ -322,12 +322,14 @@
                   <p>Otomatis mengambil kolom 0 sampai 179 (Kolom A s/d FX). Kolom selebihnya diabaikan.</p>
                 </div>
 
+                <!-- DROPDOWN MODE PENGGABUNGAN APEX -->
                 <div>
-                  <div class="flex justify-between items-center mb-1.5">
-                    <label class="block text-xs font-bold text-slate-700">Ambil N File Terakhir</label>
-                    <span class="text-[11px] text-slate-400">Kosongkan untuk semua</span>
-                  </div>
-                  <input type="number" id="apex-limit" placeholder="Contoh: 5 (atau biarkan kosong)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none" min="1">
+                  <label class="block text-xs font-bold text-slate-700 mb-1.5">Mode Penggabungan</label>
+                  <select id="apex-mode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none cursor-pointer">
+                    <option value="ALL">Gabung Semua</option>
+                    <option value="DEDUPE_COL_A">Gabung Semua + Remove Duplikat pada kolom A</option>
+                  </select>
+                  <p class="text-[11px] text-slate-400 mt-1.5">Opsi duplikat akan memeriksa nilai Kolom A unik (hanya menyimpan kemunculan pertama).</p>
                 </div>
               </div>
             </div>
@@ -590,7 +592,7 @@
                     <!-- Filter Urutkan -->
                     <div class="flex items-center gap-1.5">
                       <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-arrow-down-up-across-line text-blue-500 mr-1"></i>Urutkan:</span>
-                      <select id="pdf-dest-sort" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                      <select id="pdf-dest-sort" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                         <option value="bag-desc">🔥 Terbesar (Jumlah Bag)</option>
                         <option value="bag-asc">❄️ Terkecil (Jumlah Bag)</option>
                         <option value="weight-desc">⚖️ Terberat (Berat Kg)</option>
@@ -601,7 +603,7 @@
                     <!-- Filter Limit / Ambil Data -->
                     <div class="flex items-center gap-1.5">
                       <span class="text-[11px] font-semibold text-slate-500">Ambil:</span>
-                      <select id="pdf-dest-limit" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                      <select id="pdf-dest-limit" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                         <option value="all">Semua</option>
                         <option value="3">Top 3</option>
                         <option value="5">Top 5</option>
@@ -887,7 +889,7 @@
           </div>
 
           <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 inline-block my-2 max-w-[200px] sm:max-w-[220px]">
-            <img id="qrisImageElement" src="qris.jpeg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
+            <img id="qrisImageElement" src="qris.jpg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
           </div>
 
           <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
@@ -1219,13 +1221,7 @@
       if (selected.length === 0) return alert('Silakan pilih file berformat .csv');
 
       selected.sort((a, b) => (a.lastModified || 0) - (b.lastModified || 0));
-
-      const limit = parseInt(document.getElementById('apex-limit').value, 10);
-      if (!isNaN(limit) && limit > 0 && limit < selected.length) {
-        apexFiles = selected.slice(selected.length - limit);
-      } else {
-        apexFiles = selected;
-      }
+      apexFiles = selected;
       renderApexList();
     }
 
@@ -1267,9 +1263,13 @@
     async function processAndDownloadApex() {
       if (apexFiles.length === 0) return alert('Pilih setidaknya 1 file CSV APEX!');
 
+      const mode = document.getElementById('apex-mode') ? document.getElementById('apex-mode').value : 'ALL';
       apexStatus.textContent = 'Sedang memproses dan memotong kolom A-FX...';
+      
       let combinedData = [];
       let isFirstFile = true;
+      const seenColA = new Set();
+      let duplicateCount = 0;
 
       for (let i = 0; i < apexFiles.length; i++) {
         const file = apexFiles[i];
@@ -1278,16 +1278,49 @@
 
         if (parsed.data && parsed.data.length > 0) {
           const slicedRows = parsed.data.map(row => row.slice(0, 180));
+
           if (isFirstFile) {
-            combinedData = slicedRows;
+            // Simpan baris header dari file pertama
+            combinedData.push(slicedRows[0]);
             isFirstFile = false;
+
+            // Proses baris data file pertama
+            for (let j = 1; j < slicedRows.length; j++) {
+              const r = slicedRows[j];
+              if (mode === 'DEDUPE_COL_A') {
+                const key = (r[0] !== undefined && r[0] !== null) ? String(r[0]).trim() : '';
+                if (key !== '' && seenColA.has(key)) {
+                  duplicateCount++;
+                  continue;
+                }
+                if (key !== '') seenColA.add(key);
+              }
+              combinedData.push(r);
+            }
           } else {
-            combinedData.push(...slicedRows.slice(1));
+            // Proses baris data file kedua dan seterusnya (lewati baris header ke-0)
+            for (let j = 1; j < slicedRows.length; j++) {
+              const r = slicedRows[j];
+              if (mode === 'DEDUPE_COL_A') {
+                const key = (r[0] !== undefined && r[0] !== null) ? String(r[0]).trim() : '';
+                if (key !== '' && seenColA.has(key)) {
+                  duplicateCount++;
+                  continue;
+                }
+                if (key !== '') seenColA.add(key);
+              }
+              combinedData.push(r);
+            }
           }
         }
       }
 
-      apexStatus.textContent = `Selesai! ${combinedData.length} baris digabungkan.`;
+      if (mode === 'DEDUPE_COL_A') {
+        apexStatus.textContent = `Selesai! ${combinedData.length} baris (Dihapus ${duplicateCount} duplikat Kolom A).`;
+      } else {
+        apexStatus.textContent = `Selesai! ${combinedData.length} baris digabungkan.`;
+      }
+
       const csvOutput = Papa.unparse(combinedData);
       triggerDownload(csvOutput, 'data.csv');
     }
