@@ -10,7 +10,7 @@
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
@@ -19,6 +19,9 @@
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <!-- PapaParse for CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
@@ -74,9 +77,20 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
+
+    .selectable-text {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex font-sans selection:bg-indigo-100 selection:text-indigo-800 overflow-x-hidden">
+
+  <!-- Toast Notification untuk Auto HRS -->
+  <div id="hrsToast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+    <span id="hrsToastMsg">Tersalin ke clipboard!</span>
+  </div>
 
   <!-- ======================================================== -->
   <!-- SIDEBAR VERTICAL KIRI (DESKTOP & MOBILE DRAWER) -->
@@ -102,7 +116,7 @@
       </button>
     </div>
 
-    <!-- Navigation Section (Scrollable if height is tiny) -->
+    <!-- Navigation Section -->
     <div class="flex-1 overflow-y-auto p-3 space-y-1">
       <span class="px-2.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Fitur Pengolahan</span>
       <div class="mt-1 space-y-1">
@@ -132,10 +146,15 @@
           <span class="truncate">5. Auto Filter Seller</span>
         </button>
 
+        <button onclick="switchTab('auto-hrs')" id="tab-auto-hrs" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all">
+          <i class="fa-solid fa-truck-ramp-box text-xs w-4 text-cyan-600"></i>
+          <span class="truncate">6. Auto HRS</span>
+        </button>
+
       </div>
     </div>
 
-    <!-- Pinned Bottom Section: Profil Admin & Traktir Kopi (ALWAYS VISIBLE WITHOUT SCROLL) -->
+    <!-- Pinned Bottom Section: Profil Admin & Traktir Kopi -->
     <div class="flex-shrink-0 border-t border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
       <span class="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Dukungan & Kontak</span>
       
@@ -464,7 +483,6 @@
 
         <!-- 2 Kotak Drag & Drop: Kiri PDF, Kanan Excel -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <!-- Kotak Kiri: PDF SM to Excel -->
           <div id="pdf-dropzone" class="border-2 border-dashed border-blue-200 hover:border-blue-500 rounded-3xl p-6 sm:p-8 text-center bg-white hover:bg-blue-50/20 transition-all cursor-pointer shadow-sm group flex flex-col justify-center items-center">
             <input type="file" id="pdf-input" accept="application/pdf" multiple class="hidden">
             <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-3">
@@ -477,7 +495,6 @@
             </span>
           </div>
 
-          <!-- Kotak Kanan: Input Ulang Excel untuk Analisa Gambar/Grafik -->
           <div id="pdf-excel-dropzone" class="border-2 border-dashed border-emerald-200 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 text-center bg-white hover:bg-emerald-50/20 transition-all cursor-pointer shadow-sm group flex flex-col justify-center items-center">
             <input type="file" id="pdf-excel-input" accept=".xlsx, .xls" class="hidden">
             <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-inner mb-3">
@@ -589,7 +606,6 @@
                     <p class="text-[11px] text-slate-400">Filter & ambil data destinasi terbesar / terkecil</p>
                   </div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <!-- Filter Urutkan -->
                     <div class="flex items-center gap-1.5">
                       <span class="text-[11px] font-semibold text-slate-500"><i class="fa-solid fa-arrow-down-up-across-line text-blue-500 mr-1"></i>Urutkan:</span>
                       <select id="pdf-dest-sort" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
@@ -600,7 +616,6 @@
                         <option value="code-asc">🔤 Kode Destinasi (A-Z)</option>
                       </select>
                     </div>
-                    <!-- Filter Limit / Ambil Data -->
                     <div class="flex items-center gap-1.5">
                       <span class="text-[11px] font-semibold text-slate-500">Ambil:</span>
                       <select id="pdf-dest-limit" onchange="applyPdfDestFilter()" class="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
@@ -614,7 +629,6 @@
                   </div>
                 </div>
 
-                <!-- Quick Search & Counter Badge -->
                 <div class="mb-2.5 flex items-center gap-2">
                   <div class="relative flex-1">
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -857,6 +871,253 @@
         </div>
       </section>
 
+      <!-- ========================================== -->
+      <!-- TAB 6: AUTO HRS (RUNSHEET KHUSUS COD -) -->
+      <!-- ========================================== -->
+      <section id="panel-auto-hrs" class="tab-panel hidden">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Automation HRS - Runsheet Khusus COD (-)</h2>
+            <p class="text-sm text-slate-500">Filter runsheet awalan KRW &amp; otomatis hanya menampilkan runsheet yang murni 100% COD (-).</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-cyan-50 text-cyan-700 rounded-xl border border-cyan-100 self-start sm:self-auto">
+            <i class="fa-solid fa-truck-ramp-box"></i>
+            <span>Runsheet Pivot &amp; COD Sanitizer</span>
+          </div>
+        </div>
+
+        <!-- HRS Upload Section -->
+        <div id="hrsUploadSection" class="bg-white rounded-3xl border-2 border-dashed border-cyan-200 hover:border-cyan-500 transition-all p-8 sm:p-12 text-center shadow-sm relative overflow-hidden group cursor-pointer mb-6">
+          <input type="file" id="hrsFileInput" accept=".xlsx, .xls, .csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+          <div class="max-w-xl mx-auto space-y-4 pointer-events-none">
+            <div class="w-16 h-16 bg-cyan-50 text-cyan-600 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 group-hover:bg-cyan-600 group-hover:text-white transition duration-300 shadow-sm text-2xl">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-800">Tarik atau Pilih File Excel / CSV Runsheet</h3>
+              <p class="text-xs sm:text-sm text-slate-500 mt-1">Mendukung format: .xlsx, .xls, .csv</p>
+            </div>
+
+            <div class="bg-cyan-50/80 border border-cyan-200 rounded-2xl p-4 text-left space-y-1.5 text-xs text-cyan-950">
+              <div class="font-bold flex items-center gap-1.5 text-cyan-800">
+                <i class="fa-solid fa-circle-check text-cyan-600"></i>
+                <span>Logika Otomatisasi Aturan COD Runsheet:</span>
+              </div>
+              <p>&bull; <b>Hanya Awalan KRW:</b> Selain runsheet berawalan <code class="bg-cyan-200/60 px-1 py-0.5 rounded font-mono font-bold">KRW</code> otomatis diabaikan.</p>
+              <p>&bull; <b>COD Amount Kosong &rarr; '-':</b> Semua nilai kosong/blank diisi dengan <code class="bg-cyan-200/60 px-1 py-0.5 rounded font-mono font-bold">-</code>.</p>
+              <p>&bull; <b>Murni COD '-':</b> Jika satu runsheet terdapat COD nominal angka (meskipun bercampur blank), runsheet tersebut <b>tidak ditampilkan</b>. Hanya runsheet yang 100% COD <code class="bg-cyan-200/60 px-1 py-0.5 rounded font-mono font-bold">-</code> saja yang diambil.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- HRS Loading State -->
+        <div id="hrsLoadingSection" class="hidden bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-200 mb-6">
+          <div class="animate-spin rounded-full h-12 w-12 border-4 border-cyan-600 border-t-transparent mx-auto"></div>
+          <p class="text-base font-semibold text-slate-700 mt-4">Memproses data excel runsheet...</p>
+          <p class="text-xs text-slate-400 mt-1">Memeriksa runsheet KRW &amp; memfilter yang murni COD (-)...</p>
+        </div>
+
+        <!-- HRS Results Section -->
+        <div id="hrsResultsSection" class="hidden space-y-6">
+
+          <!-- Action Bar (Export & Reset) -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span id="hrsFileNameLabel">File aktif</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="hrsBtnExportPivot" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-sm">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Export Pivot (.xlsx)</span>
+              </button>
+              <button id="hrsBtnReset" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl transition">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Ganti File</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Metrics Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Baris File</p>
+                <h4 id="hrsStatTotalRaw" class="text-xl font-bold text-slate-800 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-database text-base"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-indigo-100 bg-indigo-50/20 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider">Total Runsheet KRW</p>
+                <h4 id="hrsStatTotalKrwRuns" class="text-xl font-bold text-indigo-700 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-truck text-base"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-emerald-200 bg-emerald-50/30 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-[10px] font-semibold text-emerald-700 uppercase tracking-wider">Murni COD (-)</p>
+                <h4 id="hrsStatKeptRuns" class="text-xl font-bold text-emerald-700 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-circle-check text-base"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-amber-200 bg-amber-50/20 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-[10px] font-semibold text-amber-700 uppercase tracking-wider">Dieliminasi (Ada COD)</p>
+                <h4 id="hrsStatExcludedRuns" class="text-xl font-bold text-amber-700 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-circle-xmark text-base"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-cyan-200 bg-cyan-50/20 shadow-sm flex items-center justify-between col-span-2 sm:col-span-1">
+              <div>
+                <p class="text-[10px] font-semibold text-cyan-700 uppercase tracking-wider">Total AWB Lolos</p>
+                <h4 id="hrsStatTotalAwb" class="text-xl font-bold text-cyan-700 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 bg-cyan-100 text-cyan-700 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-boxes-stacked text-base"></i>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Filter Controls & Mode Selection -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-cyan-600"></i> Mode Tampilan:
+              </span>
+              <div class="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                <button id="hrsModeOnlyMinus" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-cyan-700 font-bold transition">
+                  Hanya Murni COD (-)
+                </button>
+                <button id="hrsModeShowAll" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+                  Tampilkan Semua KRW
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Nomor Runsheet dapat disalin langsung per baris atau sekaligus</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Sub Tabs Navigation -->
+          <div class="flex items-center justify-between border-b border-slate-200">
+            <div class="flex gap-2">
+              <button id="hrsTabPivotBtn" class="px-5 py-2.5 font-bold text-sm text-cyan-600 border-b-2 border-cyan-600 flex items-center gap-2">
+                <i class="fa-solid fa-table-cells"></i>
+                <span>Pivot Table (RUNSHEET | COD | COUNT)</span>
+              </button>
+              <button id="hrsTabDataBtn" class="px-5 py-2.5 font-semibold text-sm text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Data Terfilter (KRW Lolos)</span>
+              </button>
+              <button id="hrsTabExcludedBtn" class="px-5 py-2.5 font-semibold text-sm text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+                <i class="fa-solid fa-ban"></i>
+                <span>Runsheet Dieliminasi (<span id="hrsExcludedCountTab">0</span>)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pivot Table View -->
+          <div id="hrsPivotView" class="space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+              <div class="relative flex-1 max-w-sm">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                <input type="text" id="hrsSearchPivot" placeholder="Cari nomor Runsheet..." class="w-full pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <button id="hrsBtnCopyAllRunsheet" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl text-slate-700 transition border border-slate-300">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Salin Semua List Runsheet</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="overflow-x-auto max-h-[600px]">
+                <table class="w-full text-left text-sm border-collapse" id="hrsPivotTableElement">
+                  <thead class="bg-slate-100 sticky top-0 z-10 border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
+                    <tr>
+                      <th class="py-3 px-4 w-12 text-center">#</th>
+                      <th class="py-3 px-4">RUNSHEET NO</th>
+                      <th class="py-3 px-4 text-center w-36">COD AMOUNT</th>
+                      <th class="py-3 px-4 text-right w-44">Count of AWB NO</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hrsPivotTableBody" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
+                  <tfoot class="bg-slate-50 sticky bottom-0 border-t-2 border-slate-300 font-bold text-slate-900 text-sm">
+                    <tr>
+                      <td colspan="3" class="py-3.5 px-4 text-right uppercase tracking-wider">Grand Total :</td>
+                      <td id="hrsGrandTotalCount" class="py-3.5 px-4 text-right text-cyan-700 text-base font-extrabold">0</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Raw Filtered Data View -->
+          <div id="hrsDataView" class="hidden space-y-4">
+            <div class="flex justify-between items-center gap-3">
+              <p class="text-xs text-slate-500 font-medium">Menampilkan baris AWB dari runsheet yang lolos seleksi murni COD (-)</p>
+              <button id="hrsBtnExportFiltered" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow-sm">
+                <i class="fa-solid fa-download"></i>
+                <span>Export Data Lolos (.xlsx)</span>
+              </button>
+            </div>
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="overflow-x-auto max-h-[550px]">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead class="bg-slate-100 sticky top-0 z-10 border-b border-slate-200 font-bold text-slate-700 uppercase" id="hrsRawTableHead"></thead>
+                  <tbody id="hrsRawTableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Excluded Runsheet View -->
+          <div id="hrsExcludedView" class="hidden space-y-4">
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-900">
+              <b>Daftar Runsheet yang Dieliminasi:</b> Runsheet di bawah ini memiliki COD Angka nominal (baik full angka maupun campuran dengan blank) sehingga disaring keluar dari pivot utama.
+            </div>
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="overflow-x-auto max-h-[550px]">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead class="bg-slate-100 sticky top-0 z-10 border-b border-slate-200 font-bold text-slate-700 uppercase">
+                    <tr>
+                      <th class="py-2.5 px-4 w-12 text-center">#</th>
+                      <th class="py-2.5 px-4">RUNSHEET NO</th>
+                      <th class="py-2.5 px-4">Kandungan COD yang Ditemukan</th>
+                      <th class="py-2.5 px-4 text-right">Total AWB</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hrsExcludedTableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -889,7 +1150,7 @@
           </div>
 
           <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 inline-block my-2 max-w-[200px] sm:max-w-[220px]">
-            <img id="qrisImageElement" src="qris.jpg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
+            <img id="qrisImageElement" src="qris.jpeg" alt="QRIS Fachreza Store" class="w-full max-h-52 sm:max-h-60 h-auto rounded-lg object-contain mx-auto">
           </div>
 
           <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
@@ -1048,7 +1309,8 @@
       'gabung-apex': '2. Penggabung File APEX (Kolom A-FX)',
       'pemisah-csv': '3. Pemisah CSV (Split Tanpa Header)',
       'pdf-sm': '4. Konverter Surat Muatan (PDF) ke Excel & Analisa',
-      'filter-seller': '5. Auto Filter Seller & Bahan Apex Generator'
+      'filter-seller': '5. Auto Filter Seller & Bahan Apex Generator',
+      'auto-hrs': '6. Automation HRS - Filter Runsheet Khusus COD (-)'
     };
 
     function switchTab(tabId) {
@@ -1071,6 +1333,10 @@
         const backdrop = document.getElementById('mobileBackdrop');
         sidebar.classList.add('-translate-x-full');
         backdrop.classList.add('hidden');
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
       }
     }
 
@@ -1280,11 +1546,9 @@
           const slicedRows = parsed.data.map(row => row.slice(0, 180));
 
           if (isFirstFile) {
-            // Simpan baris header dari file pertama
             combinedData.push(slicedRows[0]);
             isFirstFile = false;
 
-            // Proses baris data file pertama
             for (let j = 1; j < slicedRows.length; j++) {
               const r = slicedRows[j];
               if (mode === 'DEDUPE_COL_A') {
@@ -1298,7 +1562,6 @@
               combinedData.push(r);
             }
           } else {
-            // Proses baris data file kedua dan seterusnya (lewati baris header ke-0)
             for (let j = 1; j < slicedRows.length; j++) {
               const r = slicedRows[j];
               if (mode === 'DEDUPE_COL_A') {
@@ -1477,12 +1740,10 @@
     const pdfDownloadOutboundBtn = document.getElementById('pdf-download-outbound-btn');
     const pdfResultsContainer = document.getElementById('pdf-results-container');
 
-    // Setup Kotak Kiri (PDF)
     pdfDropzone.addEventListener('click', () => pdfInput.click());
     setupDragDrop(pdfDropzone, (files) => processPdfFiles(files));
     pdfInput.addEventListener('change', (e) => processPdfFiles(e.target.files));
 
-    // Setup Kotak Kanan (Excel)
     pdfExcelDropzone.addEventListener('click', () => pdfExcelInput.click());
     setupDragDrop(pdfExcelDropzone, (files) => {
       if (files.length > 0) processExcelForPdfTool(files[0]);
@@ -1491,7 +1752,6 @@
       if (e.target.files.length > 0) processExcelForPdfTool(e.target.files[0]);
     });
 
-    // Proses File Excel yang di-drop ke Kotak Kanan
     async function processExcelForPdfTool(file) {
       if (!file.name.match(/\.(xlsx|xls)$/i)) return alert('Harap pilih file berekstensi .xlsx atau .xls!');
 
@@ -1823,7 +2083,6 @@
 
         if (tokens.length >= 5 && /^\d+$/.test(tokens[0])) {
           const no = tokens[0];
-          // Validasi Station Code (6-8 karakter)
           const isStationCode = (str) => /^[A-Za-z]{3}\d{3,5}$/.test(str);
           const isKnownOrigin = (str) => !!ORIGIN_NAMES[str] || /^KRW\d{3,5}$/i.test(str);
 
@@ -2044,12 +2303,10 @@
       let codes = Object.keys(currentPdfDestMap);
       const totalDestCount = codes.length;
 
-      // Filter Pencarian
       if (searchVal) {
         codes = codes.filter(c => c.toUpperCase().includes(searchVal));
       }
 
-      // Pengurutan (Terkecil vs Terbesar)
       codes.sort((a, b) => {
         const itemA = currentPdfDestMap[a];
         const itemB = currentPdfDestMap[b];
@@ -2062,7 +2319,6 @@
         return 0;
       });
 
-      // Limit / Ambil Top N data
       let displayedCodes = codes;
       if (limitVal !== 'all') {
         const limit = parseInt(limitVal, 10);
@@ -2071,7 +2327,6 @@
         }
       }
 
-      // Update badge jumlah
       const badge = document.getElementById('pdf-dest-count-badge');
       if (badge) {
         if (displayedCodes.length === totalDestCount) {
@@ -2081,7 +2336,6 @@
         }
       }
 
-      // Update icon indikator header
       updateSortIcon('sort-icon-dest-code', sortVal.startsWith('code'), sortVal === 'code-asc');
       updateSortIcon('sort-icon-dest-bag', sortVal.startsWith('bag'), sortVal === 'bag-asc');
       updateSortIcon('sort-icon-dest-weight', sortVal.startsWith('weight'), sortVal === 'weight-asc');
@@ -2206,7 +2460,6 @@
       });
     }
 
-    // Export Excel HANYA 1 Sheet (Tanpa Sheet Ringkasan Analisa)
     function downloadPdfExcel() {
       if (pdfMasterRows.length === 0) return alert('Tidak ada data PDF untuk diunduh.');
 
@@ -2281,7 +2534,6 @@
         return OUTBOUND_SCHEDULE_MAP[clean].armada;
       }
 
-      // Handle variasi KRWCGX / KRWCGK
       const mCg = clean.match(/^KRWCG[XK](\d+)/);
       if (mCg) {
         const num = parseInt(mCg[1], 10);
@@ -2294,7 +2546,6 @@
         return 'ARMADA 7';
       }
 
-      // Handle Direct destination code: KRW + 3-char (misal: KRWBDO -> BDO)
       const mDirect = clean.match(/^KRW([A-Z]{3})/);
       if (mDirect) {
         const code = mDirect[1];
@@ -2303,7 +2554,6 @@
         return code;
       }
 
-      // Fallback jika Schedule No kosong / tidak dikenali, deteksi dari No SM
       if (noSm) {
         const cleanSm = noSm.trim().toUpperCase();
         if (cleanSm.startsWith('KRWMGH')) return 'ARMADA 1';
@@ -2316,7 +2566,6 @@
         }
       }
 
-      // Fallback dest jika valid 3 karakter
       if (dest && dest !== 'CGK' && dest !== 'CGX' && dest.length === 3) {
         return dest;
       }
@@ -2424,7 +2673,7 @@
         const armada = getArmadaFromSchedule(val.scheduleNo, dest, val.noSmu);
         const noSm = val.noSmu || '-';
         const etd = formatOutboundEtd(val.etd);
-        const driver = ''; // Dikosongkan sesuai permintaan
+        const driver = '';
         const noPolisi = val.noPol || (val.sampleRow ? val.sampleRow.noPol : '') || '';
 
         reportRows.push({
@@ -2492,15 +2741,15 @@
       const ws = XLSX.utils.json_to_sheet(reportRows);
 
       ws['!cols'] = [
-        { wch: 14 }, // Date
-        { wch: 12 }, // Total Bag
-        { wch: 8 },  // Dest
-        { wch: 14 }, // Weight (Kg)
-        { wch: 16 }, // Armada
-        { wch: 22 }, // No SM
-        { wch: 10 }, // ETD
-        { wch: 14 }, // Driver
-        { wch: 16 }  // No Polisi
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 8 },
+        { wch: 14 },
+        { wch: 16 },
+        { wch: 22 },
+        { wch: 10 },
+        { wch: 14 },
+        { wch: 16 }
       ];
 
       XLSX.utils.book_append_sheet(wb, ws, "Report Outbound");
@@ -2764,6 +3013,518 @@
     }
 
     // --------------------------------------------------------
+    // TOOL 6: AUTOMATION HRS (RUNSHEET KHUSUS COD -)
+    // --------------------------------------------------------
+    let hrsRawData = [];
+    let hrsOriginalFileName = "Automation_HRS";
+    let hrsFilterMode = "ONLY_MINUS"; // "ONLY_MINUS" or "SHOW_ALL"
+
+    let hrsRunsheetStats = new Map();
+    let hrsCurrentPivotData = [];
+    let hrsCurrentFilteredRows = [];
+    let hrsCurrentExcludedRuns = [];
+
+    const hrsFileInput = document.getElementById('hrsFileInput');
+    const hrsUploadSection = document.getElementById('hrsUploadSection');
+    const hrsLoadingSection = document.getElementById('hrsLoadingSection');
+    const hrsResultsSection = document.getElementById('hrsResultsSection');
+
+    const hrsStatTotalRaw = document.getElementById('hrsStatTotalRaw');
+    const hrsStatTotalKrwRuns = document.getElementById('hrsStatTotalKrwRuns');
+    const hrsStatKeptRuns = document.getElementById('hrsStatKeptRuns');
+    const hrsStatExcludedRuns = document.getElementById('hrsStatExcludedRuns');
+    const hrsStatTotalAwb = document.getElementById('hrsStatTotalAwb');
+
+    const hrsModeOnlyMinus = document.getElementById('hrsModeOnlyMinus');
+    const hrsModeShowAll = document.getElementById('hrsModeShowAll');
+
+    const hrsTabPivotBtn = document.getElementById('hrsTabPivotBtn');
+    const hrsTabDataBtn = document.getElementById('hrsTabDataBtn');
+    const hrsTabExcludedBtn = document.getElementById('hrsTabExcludedBtn');
+    const hrsExcludedCountTab = document.getElementById('hrsExcludedCountTab');
+
+    const hrsPivotView = document.getElementById('hrsPivotView');
+    const hrsDataView = document.getElementById('hrsDataView');
+    const hrsExcludedView = document.getElementById('hrsExcludedView');
+
+    const hrsPivotTableBody = document.getElementById('hrsPivotTableBody');
+    const hrsGrandTotalCount = document.getElementById('hrsGrandTotalCount');
+    const hrsSearchPivot = document.getElementById('hrsSearchPivot');
+    const hrsBtnCopyAllRunsheet = document.getElementById('hrsBtnCopyAllRunsheet');
+    const hrsBtnExportPivot = document.getElementById('hrsBtnExportPivot');
+    const hrsBtnExportFiltered = document.getElementById('hrsBtnExportFiltered');
+    const hrsBtnReset = document.getElementById('hrsBtnReset');
+
+    const hrsRawTableHead = document.getElementById('hrsRawTableHead');
+    const hrsRawTableBody = document.getElementById('hrsRawTableBody');
+    const hrsExcludedTableBody = document.getElementById('hrsExcludedTableBody');
+
+    const hrsToast = document.getElementById('hrsToast');
+    const hrsToastMsg = document.getElementById('hrsToastMsg');
+
+    function showHrsToast(message) {
+      hrsToastMsg.textContent = message;
+      hrsToast.classList.remove('translate-y-20', 'opacity-0');
+      hrsToast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        hrsToast.classList.remove('translate-y-0', 'opacity-100');
+        hrsToast.classList.add('translate-y-20', 'opacity-0');
+      }, 2000);
+    }
+
+    hrsFileInput.addEventListener('change', handleHrsFile);
+
+    hrsUploadSection.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      hrsUploadSection.classList.add('border-cyan-500', 'bg-cyan-50/40');
+    });
+    hrsUploadSection.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      hrsUploadSection.classList.remove('border-cyan-500', 'bg-cyan-50/40');
+    });
+    hrsUploadSection.addEventListener('drop', (e) => {
+      hrsUploadSection.classList.remove('border-cyan-500', 'bg-cyan-50/40');
+    });
+
+    function handleHrsFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      hrsOriginalFileName = file.name.replace(/\.[^/.]+$/, "");
+      document.getElementById('hrsFileNameLabel').textContent = file.name;
+      hrsUploadSection.classList.add('hidden');
+      hrsLoadingSection.classList.remove('hidden');
+
+      setTimeout(() => {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            hrsRawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            analyzeHrsData();
+          } catch (err) {
+            alert("Gagal membaca file: " + err.message);
+            resetHrs();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }, 100);
+    }
+
+    function findHrsColumnKey(row, possibleNames) {
+      const keys = Object.keys(row);
+      for (const name of possibleNames) {
+        const exact = keys.find(k => k.trim().toUpperCase() === name.toUpperCase());
+        if (exact) return exact;
+      }
+      return null;
+    }
+
+    function analyzeHrsData() {
+      if (!hrsRawData || hrsRawData.length === 0) {
+        alert("File kosong atau tidak memiliki data!");
+        resetHrs();
+        return;
+      }
+
+      const sampleRow = hrsRawData[0];
+      const runsheetKey = findHrsColumnKey(sampleRow, ["RUNSHEET NO", "RUNSHEET_NO", "RUNSHEETNO"]) || "RUNSHEET NO";
+      const codKey = findHrsColumnKey(sampleRow, ["COD AMOUNT", "COD Amount", "COD_AMOUNT", "CODAMOUNT"]) || "COD Amount";
+
+      hrsRunsheetStats.clear();
+
+      hrsRawData.forEach((row) => {
+        let rawRunsheet = row[runsheetKey] !== undefined ? String(row[runsheetKey]).trim() : "";
+
+        if (!rawRunsheet.toUpperCase().startsWith("KRW")) {
+          return;
+        }
+
+        let rawCod = row[codKey];
+        let cleanCod = "-";
+        let isNumeric = false;
+
+        if (rawCod !== null && rawCod !== undefined) {
+          const strCod = String(rawCod).trim();
+          if (strCod !== "" && strCod !== "-" && strCod !== "0") {
+            cleanCod = strCod;
+            isNumeric = true;
+          }
+        }
+
+        const standardizedRow = { ...row };
+        standardizedRow[runsheetKey] = rawRunsheet;
+        standardizedRow[codKey] = cleanCod;
+
+        if (!hrsRunsheetStats.has(rawRunsheet)) {
+          hrsRunsheetStats.set(rawRunsheet, {
+            runsheet: rawRunsheet,
+            items: [],
+            hasNumericCod: false,
+            codCounts: new Map()
+          });
+        }
+
+        const stat = hrsRunsheetStats.get(rawRunsheet);
+        stat.items.push(standardizedRow);
+        if (isNumeric) {
+          stat.hasNumericCod = true;
+        }
+
+        const count = stat.codCounts.get(cleanCod) || 0;
+        stat.codCounts.set(cleanCod, count + 1);
+      });
+
+      applyHrsFilterAndRender();
+
+      hrsLoadingSection.classList.add('hidden');
+      hrsResultsSection.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function applyHrsFilterAndRender() {
+      hrsCurrentPivotData = [];
+      hrsCurrentFilteredRows = [];
+      hrsCurrentExcludedRuns = [];
+
+      let totalKrwRunsheetCount = hrsRunsheetStats.size;
+      let keptCount = 0;
+      let totalAwbCount = 0;
+
+      const sortedRunsheets = Array.from(hrsRunsheetStats.keys()).sort();
+
+      sortedRunsheets.forEach(rs => {
+        const stat = hrsRunsheetStats.get(rs);
+
+        if (stat.hasNumericCod) {
+          hrsCurrentExcludedRuns.push(stat);
+        }
+
+        let isEligible = false;
+        if (hrsFilterMode === "ONLY_MINUS") {
+          if (!stat.hasNumericCod) {
+            isEligible = true;
+          }
+        } else {
+          isEligible = true;
+        }
+
+        if (isEligible) {
+          keptCount++;
+          const items = [];
+          let rsTotal = 0;
+
+          stat.codCounts.forEach((count, cod) => {
+            rsTotal += count;
+            items.push({ cod, count });
+          });
+
+          items.sort((a, b) => {
+            if (a.cod === "-") return -1;
+            if (b.cod === "-") return 1;
+            return a.cod.localeCompare(b.cod, undefined, { numeric: true });
+          });
+
+          totalAwbCount += rsTotal;
+          hrsCurrentPivotData.push({
+            runsheet: rs,
+            total: rsTotal,
+            items: items
+          });
+
+          stat.items.forEach(item => hrsCurrentFilteredRows.push(item));
+        }
+      });
+
+      hrsStatTotalRaw.textContent = hrsRawData.length.toLocaleString('id-ID');
+      hrsStatTotalKrwRuns.textContent = totalKrwRunsheetCount.toLocaleString('id-ID');
+      hrsStatKeptRuns.textContent = keptCount.toLocaleString('id-ID');
+      hrsStatExcludedRuns.textContent = hrsCurrentExcludedRuns.length.toLocaleString('id-ID');
+      hrsStatTotalAwb.textContent = totalAwbCount.toLocaleString('id-ID');
+      hrsExcludedCountTab.textContent = hrsCurrentExcludedRuns.length.toLocaleString('id-ID');
+
+      renderHrsPivotTable();
+      renderHrsRawTable();
+      renderHrsExcludedTable();
+    }
+
+    function renderHrsPivotTable(query = "") {
+      hrsPivotTableBody.innerHTML = "";
+      const q = query.trim().toUpperCase();
+
+      let visibleRuns = 0;
+      let totalCountFiltered = 0;
+
+      hrsCurrentPivotData.forEach((group) => {
+        if (q && !group.runsheet.toUpperCase().includes(q)) {
+          return;
+        }
+
+        visibleRuns++;
+        totalCountFiltered += group.total;
+
+        group.items.forEach((item) => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-cyan-50/40 transition text-sm text-slate-700 bg-white border-b border-slate-100";
+
+          tr.innerHTML = `
+            <td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${visibleRuns}</td>
+            <td class="py-3 px-4 font-bold text-slate-900 selectable-text">
+              <div class="flex items-center gap-2 group">
+                <span class="selectable-text font-mono text-cyan-700 select-all cursor-text text-sm">${group.runsheet}</span>
+                <button type="button" title="Salin nomor runsheet" onclick="copySingleHrsRunsheet('${group.runsheet}', this)" class="p-1 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded transition">
+                  <i class="fa-regular fa-copy text-xs"></i>
+                </button>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono font-bold text-xs">${item.cod}</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-slate-800 text-sm">${item.count.toLocaleString('id-ID')}</td>
+          `;
+
+          hrsPivotTableBody.appendChild(tr);
+        });
+      });
+
+      if (visibleRuns === 0) {
+        hrsPivotTableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-12 text-center text-slate-400">
+              Tidak ada data Runsheet yang cocok.
+            </td>
+          </tr>
+        `;
+      }
+
+      hrsGrandTotalCount.textContent = totalCountFiltered.toLocaleString('id-ID');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    window.copySingleHrsRunsheet = function(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        showHrsToast(`Runsheet ${text} berhasil disalin!`);
+        if (btnElement) {
+          const originalHTML = btnElement.innerHTML;
+          btnElement.innerHTML = `<i class="fa-solid fa-check text-emerald-600 text-xs"></i>`;
+          setTimeout(() => {
+            btnElement.innerHTML = originalHTML;
+          }, 1500);
+        }
+      }).catch(() => {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showHrsToast(`Runsheet ${text} berhasil disalin!`);
+      });
+    };
+
+    hrsBtnCopyAllRunsheet.addEventListener('click', () => {
+      if (!hrsCurrentPivotData || hrsCurrentPivotData.length === 0) {
+        showHrsToast("Tidak ada runsheet untuk disalin.");
+        return;
+      }
+
+      const q = hrsSearchPivot.value.trim().toUpperCase();
+      const list = hrsCurrentPivotData
+        .filter(g => !q || g.runsheet.toUpperCase().includes(q))
+        .map(g => g.runsheet);
+
+      if (list.length === 0) {
+        showHrsToast("Tidak ada runsheet yang cocok.");
+        return;
+      }
+
+      const copyText = list.join('\n');
+      navigator.clipboard.writeText(copyText).then(() => {
+        showHrsToast(`Berhasil menyalin ${list.length} nomor Runsheet!`);
+      }).catch(() => {
+        const temp = document.createElement('textarea');
+        temp.value = copyText;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showHrsToast(`Berhasil menyalin ${list.length} nomor Runsheet!`);
+      });
+    });
+
+    function renderHrsRawTable() {
+      if (hrsCurrentFilteredRows.length === 0) {
+        hrsRawTableHead.innerHTML = `<tr><th class="p-4 text-center">Tidak ada data</th></tr>`;
+        hrsRawTableBody.innerHTML = "";
+        return;
+      }
+
+      const keys = Object.keys(hrsCurrentFilteredRows[0]);
+      hrsRawTableHead.innerHTML = `
+        <tr>
+          <th class="py-2.5 px-3">#</th>
+          ${keys.map(k => `<th class="py-2.5 px-3 whitespace-nowrap">${escapeHtml(k)}</th>`).join('')}
+        </tr>
+      `;
+
+      const previewRows = hrsCurrentFilteredRows.slice(0, 100);
+      hrsRawTableBody.innerHTML = previewRows.map((row, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-mono text-slate-400">${idx + 1}</td>
+          ${keys.map(k => `<td class="py-2 px-3 whitespace-nowrap font-mono selectable-text">${escapeHtml(row[k] !== undefined ? String(row[k]) : "")}</td>`).join('')}
+        </tr>
+      `).join('');
+    }
+
+    function renderHrsExcludedTable() {
+      if (hrsCurrentExcludedRuns.length === 0) {
+        hrsExcludedTableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-8 text-center text-slate-400">
+              Tidak ada runsheet yang dieliminasi.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      hrsExcludedTableBody.innerHTML = hrsCurrentExcludedRuns.map((stat, idx) => {
+        const codList = [];
+        stat.codCounts.forEach((count, cod) => {
+          codList.push(`${cod} (${count} awb)`);
+        });
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-4 text-center text-slate-400 font-mono">${idx + 1}</td>
+            <td class="py-2.5 px-4 font-bold text-slate-800 selectable-text">
+              <span class="selectable-text font-mono select-all text-cyan-800">${escapeHtml(stat.runsheet)}</span>
+            </td>
+            <td class="py-2.5 px-4 text-xs font-mono">
+              <span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                ${escapeHtml(codList.join(', '))}
+              </span>
+            </td>
+            <td class="py-2.5 px-4 text-right font-mono font-semibold text-slate-700">${stat.items.length.toLocaleString('id-ID')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    hrsModeOnlyMinus.addEventListener('click', () => {
+      hrsFilterMode = "ONLY_MINUS";
+      hrsModeOnlyMinus.className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-cyan-700 font-bold transition";
+      hrsModeShowAll.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      applyHrsFilterAndRender();
+    });
+
+    hrsModeShowAll.addEventListener('click', () => {
+      hrsFilterMode = "SHOW_ALL";
+      hrsModeShowAll.className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-cyan-700 font-bold transition";
+      hrsModeOnlyMinus.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      applyHrsFilterAndRender();
+    });
+
+    hrsSearchPivot.addEventListener('input', (e) => {
+      renderHrsPivotTable(e.target.value);
+    });
+
+    function setHrsSubTab(activeTab) {
+      hrsTabPivotBtn.className = "px-5 py-2.5 font-semibold text-sm text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      hrsTabDataBtn.className = "px-5 py-2.5 font-semibold text-sm text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      hrsTabExcludedBtn.className = "px-5 py-2.5 font-semibold text-sm text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+
+      hrsPivotView.classList.add('hidden');
+      hrsDataView.classList.add('hidden');
+      hrsExcludedView.classList.add('hidden');
+
+      if (activeTab === 'pivot') {
+        hrsTabPivotBtn.className = "px-5 py-2.5 font-bold text-sm text-cyan-600 border-b-2 border-cyan-600 flex items-center gap-2";
+        hrsPivotView.classList.remove('hidden');
+      } else if (activeTab === 'data') {
+        hrsTabDataBtn.className = "px-5 py-2.5 font-bold text-sm text-cyan-600 border-b-2 border-cyan-600 flex items-center gap-2";
+        hrsDataView.classList.remove('hidden');
+      } else if (activeTab === 'excluded') {
+        hrsTabExcludedBtn.className = "px-5 py-2.5 font-bold text-amber-600 border-b-2 border-amber-600 flex items-center gap-2";
+        hrsExcludedView.classList.remove('hidden');
+      }
+    }
+
+    hrsTabPivotBtn.addEventListener('click', () => setHrsSubTab('pivot'));
+    hrsTabDataBtn.addEventListener('click', () => setHrsSubTab('data'));
+    hrsTabExcludedBtn.addEventListener('click', () => setHrsSubTab('excluded'));
+
+    hrsBtnExportPivot.addEventListener('click', () => {
+      if (!hrsCurrentPivotData || hrsCurrentPivotData.length === 0) {
+        alert("Tidak ada data pivot untuk diekspor!");
+        return;
+      }
+
+      const exportRows = [];
+      let grandTotal = 0;
+
+      hrsCurrentPivotData.forEach(group => {
+        group.items.forEach(item => {
+          exportRows.push({
+            "RUNSHEET NO": group.runsheet,
+            "COD AMOUNT": item.cod,
+            "COUNT OF AWB NO": item.count
+          });
+          grandTotal += item.count;
+        });
+      });
+
+      exportRows.push({
+        "RUNSHEET NO": "GRAND TOTAL",
+        "COD AMOUNT": "",
+        "COUNT OF AWB NO": grandTotal
+      });
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      ws['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 20 }];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Pivot_Automation_HRS");
+
+      const modeSuffix = hrsFilterMode === "ONLY_MINUS" ? "Murni_Minus" : "Semua";
+      XLSX.writeFile(wb, `Pivot_${hrsOriginalFileName}_${modeSuffix}.xlsx`);
+    });
+
+    hrsBtnExportFiltered.addEventListener('click', () => {
+      if (!hrsCurrentFilteredRows || hrsCurrentFilteredRows.length === 0) {
+        alert("Tidak ada data untuk diekspor!");
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(hrsCurrentFilteredRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Filtered_KRW_Lolos");
+      XLSX.writeFile(wb, `Filtered_KRW_${hrsOriginalFileName}.xlsx`);
+    });
+
+    hrsBtnReset.addEventListener('click', resetHrs);
+
+    function resetHrs() {
+      hrsRawData = [];
+      hrsRunsheetStats.clear();
+      hrsCurrentPivotData = [];
+      hrsCurrentFilteredRows = [];
+      hrsCurrentExcludedRuns = [];
+      hrsFileInput.value = "";
+      
+      hrsUploadSection.classList.remove('hidden');
+      hrsLoadingSection.classList.add('hidden');
+      hrsResultsSection.classList.add('hidden');
+      hrsSearchPivot.value = "";
+      setHrsSubTab('pivot');
+    }
+
+    // --------------------------------------------------------
     // GENERAL UTILITIES
     // --------------------------------------------------------
     function readFileAsText(file) {
@@ -2808,6 +3569,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderSellerRulesList();
+      if (window.lucide) lucide.createIcons();
     });
   </script>
 </body>
